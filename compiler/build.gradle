@@ -1,0 +1,21 @@
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'com.google.devtools.ksp'
+}
+
+java {
+    sourceCompatibility = rootProject.ext.javaVersion
+    targetCompatibility = rootProject.ext.javaVersion
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = rootProject.ext.kotlinJvmTarget
+}
+
+dependencies {
+    implementation libs.devtools.ksp
+    implementation libs.kotlinpoet.ksp
+//    implementation 'com.squareup:kotlinpoet-ksp:1.12.0'
+    implementation project(':annotations')
+}

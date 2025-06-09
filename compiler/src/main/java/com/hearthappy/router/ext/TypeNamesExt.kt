@@ -22,6 +22,11 @@ object RouterTypeNames {
     internal val Router = ClassName("com.hearthappy.router.core.Router", "Router")
     internal val RouterParamInfo = ClassName("com.hearthappy.router.core.Router", "ParamInfo")
     internal val TargetActivity=ClassName("com.hearthappy.router.annotations", "TargetActivity")
+    internal val AppCompatActivity=ClassName("androidx.appcompat.app",  "AppCompatActivity")
+    internal val Activity=ClassName("android.app", "Activity")
+    internal val Service=ClassName("android.app", "Service")
+    internal val Fragment=ClassName("androidx.fragment.app", "Fragment")
+    internal val BroadcastReceiver=ClassName("android.content", "BroadcastReceiver")
 }
 
 object CollectionsTypeNames{

@@ -6,4 +6,5 @@ class RouterInfo {
     var clazz: String = ""
     var containingFile: KSFile? = null
     val params: MutableList<ParamInfo> = mutableListOf()
+    var supperType: Int = 0
 }

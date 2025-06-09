@@ -13,6 +13,7 @@ import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
 import com.hearthappy.router.annotations.TargetActivity
 import com.hearthappy.router.constant.Constant
+import com.hearthappy.router.datahandler.convertType
 import com.hearthappy.router.datahandler.reRouterName
 import com.hearthappy.router.ext.CollectionsTypeNames
 import com.hearthappy.router.ext.RouterTypeNames
@@ -24,13 +25,16 @@ import com.hearthappy.router.model.RouterInfo
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.ksp.toTypeName
 
 /**
  * Created Date: 2025/6/7
  * @author ChenRui
  * ClassDescription： 解析并生成路由文件
  */
-class RouterProcessor(private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory) : SymbolProcessor {
+class RouterProcessor(
+    private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory
+) : SymbolProcessor {
 
     private val routes = mutableMapOf<String, RouterInfo>()
 
@@ -39,7 +43,8 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
 
         val invalidSymbols = routeSymbols.filter { it.validate() }.toList()
         if (invalidSymbols.isEmpty()) return emptyList()
-        routeSymbols.filterIsInstance<KSClassDeclaration>().forEach { it.accept(RouterVisitor(routes), Unit) }
+        routeSymbols.filterIsInstance<KSClassDeclaration>()
+            .forEach { it.accept(RouterVisitor(routes), Unit) }
 
         generateRouterTable()
         return emptyList()
@@ -57,21 +62,46 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
 
     private fun IPoetFactory.generateRouter(info: RouterInfo) {
         val routerFileName = "Router$$".plus(info.clazz.substringAfterLast('.'))
-        val routerClassSpec = createClassSpec(routerFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
-        routerClassSpec.addSpecProperty("params", CollectionsTypeNames.List.parameterizedBy(RouterTypeNames.RouterParamInfo), null, false, CodeBlock.builder().apply {
-            add("listOf(")
-            info.params.forEach { add("ParamInfo(name = \"${it.name}\", fieldName = \"${it.fieldName}\", type = \"${it.type}\"),\n") }
-            add(")")
-        }.build())
-        routerClassSpec.buildAndWrite(routerFileName, Constant.GENERATE_ROUTER_ACT_PKG, containingFile = info.containingFile!!, codeGenerator)
+        val routerClassSpec = createClassSpec(
+            routerFileName,
+            superClassName = null,
+            constructorParameters = emptyList(),
+            isAddConstructorProperty = false
+        )
+        routerClassSpec.addSpecProperty(
+            "params",
+            CollectionsTypeNames.List.parameterizedBy(RouterTypeNames.RouterParamInfo),
+            null,
+            false,
+            CodeBlock.builder().apply {
+                add("listOf(")
+                info.params.forEach { add("ParamInfo(name = \"${it.name}\", fieldName = \"${it.fieldName}\", type = \"${it.type}\"),\n") }
+                add(")")
+            }.build()
+        )
+        routerClassSpec.buildAndWrite(
+            routerFileName,
+            Constant.GENERATE_ROUTER_ACT_PKG,
+            containingFile = info.containingFile!!,
+            codeGenerator
+        )
     }
 
     private fun IPoetFactory.generatePath(path: String, info: RouterInfo) {
         val pathFileName = "Path$$".plus(path.reRouterName())
         val classPkg = info.clazz.substringBeforeLast('.')
         val simpleName = info.clazz.substringAfterLast('.')
-        val pathClassSpec = createClassSpec(pathFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
-        pathClassSpec.addAnnotation(AnnotationSpec.builder(TargetActivity::class).addMember("name = ${simpleName}::class").build())
+        val pathClassSpec = createClassSpec(
+            pathFileName,
+            superClassName = null,
+            constructorParameters = emptyList(),
+            isAddConstructorProperty = false
+        )
+        pathClassSpec.addAnnotation(
+            AnnotationSpec.builder(TargetActivity::class).addMember("name = ${simpleName}::class")
+                .addMember("type = ${info.supperType}")
+                .build()
+        )
         val fileSpec = createFileSpec(pathFileName, Constant.GENERATE_ROUTER_PATH_PKG)
         fileSpec.addImport(classPkg, listOf(simpleName))
         fileSpec.buildAndWrite(pathClassSpec.build(), info.containingFile!!, codeGenerator)
@@ -85,22 +115,29 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
         }
 
         private fun processRouteClass(classDeclaration: KSClassDeclaration) {
-            val routeAnnotation = classDeclaration.annotations.first { it.annotationType.resolve().declaration.qualifiedName?.asString() == Route::class.qualifiedName }
+            val routeAnnotation =
+                classDeclaration.annotations.first { it.annotationType.resolve().declaration.qualifiedName?.asString() == Route::class.qualifiedName }
 
-            val path = routeAnnotation.arguments.first { it.name?.asString() == "path" }.value as String
+            val path =
+                routeAnnotation.arguments.first { it.name?.asString() == "path" }.value as String
 
             val className = classDeclaration.qualifiedName?.asString() ?: return
             val routerInfo = RouterInfo()
             routerInfo.clazz = className
             routerInfo.containingFile = classDeclaration.containingFile
-
+            routerInfo.supperType = classDeclaration.superTypes.first().toTypeName().convertType()
             classDeclaration.getAllProperties().forEach { property ->
                 property.annotations.forEach { annotation ->
                     if (annotation.annotationType.resolve().declaration.qualifiedName?.asString() == Autowired::class.qualifiedName) {
-                        val name = annotation.arguments.firstOrNull { it.name?.asString() == "name" }?.value as? String
+                        val name =
+                            annotation.arguments.firstOrNull { it.name?.asString() == "name" }?.value as? String
                         val fieldName = property.simpleName.asString()
                         val paramName = name?.takeIf { it.isNotEmpty() }?.run { this } ?: fieldName
-                        val paramInfo = ParamInfo(name = paramName, fieldName = fieldName, type = property.type.resolve().declaration.qualifiedName?.asString() ?: "")
+                        val paramInfo = ParamInfo(
+                            name = paramName,
+                            fieldName = fieldName,
+                            type = property.type.resolve().declaration.qualifiedName?.asString() ?: ""
+                        )
                         routerInfo.params.add(paramInfo)
                     }
                 }

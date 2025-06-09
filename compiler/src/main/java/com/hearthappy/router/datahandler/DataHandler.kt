@@ -2,20 +2,22 @@ package com.hearthappy.router.datahandler
 
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSValueArgument
+import com.hearthappy.router.ext.RouterTypeNames
+import com.squareup.kotlinpoet.TypeName
 
 
 fun <R : Any> List<KSValueArgument>.findArgsValue(paramName: String): R {
     for (arg in this) {
         if (arg.name?.asString() == paramName) {
-            @Suppress("UNCHECKED_CAST")
-            return arg.value as R
+            @Suppress("UNCHECKED_CAST") return arg.value as R
         }
     }
     throw IllegalArgumentException("No argument found with name: $paramName")
 }
 
 
-fun Sequence<KSAnnotation>.findSpecifiedAnt(vararg annotationNames: String) = this.find { annotationNames.contains(it.shortName.asString()) }
+fun Sequence<KSAnnotation>.findSpecifiedAnt(vararg annotationNames: String) =
+    this.find { annotationNames.contains(it.shortName.asString()) }
 
 fun String.bindSuffix() = this.removePrefix("Bind")
 
@@ -24,7 +26,8 @@ fun String.bindSuffix() = this.removePrefix("Bind")
  * @receiver String
  * @return String
  */
-fun String.convertFirstChar(): String = this.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+fun String.convertFirstChar(): String =
+    this.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 
 /**
  * 将注解类型转换成属性前缀
@@ -48,10 +51,8 @@ fun String.className2PropertyName() = this.replaceFirstChar { it.lowercaseChar()
  * @receiver String
  * @return String
  */
-fun String.reConstName(): String {
-    // 使用正则表达式将小写字母和大写字母分开
-    return replace(Regex("([a-z])([A-Z])"), "$1_$2")
-        // 将整个字符串转换为大写
+fun String.reConstName(): String { // 使用正则表达式将小写字母和大写字母分开
+    return replace(Regex("([a-z])([A-Z])"), "$1_$2") // 将整个字符串转换为大写
         .uppercase()
 }
 
@@ -71,20 +72,17 @@ fun String.rename(): String {
  * @return String
  */
 fun String.reFileName(): String {
-    return this.split("_")
-        .joinToString("") { it.replaceFirstChar { rfc -> rfc.uppercaseChar() } }
+    return this.split("_").joinToString("") { it.replaceFirstChar { rfc -> rfc.uppercaseChar() } }
         .replaceFirstChar { it.uppercase() }.plus("Ext")
 }
 
 fun String.rePreferencesKeysName(): String {
-    return this.split("_")
-        .joinToString("") { it.replaceFirstChar { rfc -> rfc.uppercaseChar() } }
+    return this.split("_").joinToString("") { it.replaceFirstChar { rfc -> rfc.uppercaseChar() } }
         .replaceFirstChar { it.uppercase() }.plus("Keys")
 }
 
 fun String.reRouterName(): String {
-    return this.split("/")
-        .joinToString("") { it.replaceFirstChar { rfc -> rfc.uppercaseChar() } }
+    return this.split("/").joinToString("") { it.replaceFirstChar { rfc -> rfc.uppercaseChar() } }
         .replaceFirstChar { it.uppercase() }
 }
 
@@ -94,9 +92,31 @@ fun convertToCamelCase(input: String): String {
         .replaceFirstChar { it.lowercaseChar() }
 }
 
-/**
- * 处理最后一个属性的空判，如果接收类型中带？检测。则删除空判
- * @receiver String  result.data.id?
- * @return String  result.data.id
- */
-fun String.replaceLastQuestionMark() = this.removeSuffix("?")
+
+// 扩展函数：判断一个类是否是另一个类的子类
+fun isActivity(supperClass: TypeName): Boolean {
+    return supperClass.toString().contains(RouterTypeNames.Activity.simpleName)
+}
+
+fun isService(supperClass: TypeName): Boolean {
+    return supperClass.toString().contains(RouterTypeNames.Service.simpleName)
+}
+
+fun isFragment(supperClass: TypeName): Boolean {
+    return supperClass.toString().contains(RouterTypeNames.Fragment.simpleName)
+}
+
+fun isBroadcastReceiver(supperClass: TypeName): Boolean {
+    return supperClass.toString().contains(RouterTypeNames.BroadcastReceiver.simpleName)
+}
+
+
+fun TypeName.convertType(): Int {
+    return when {
+        isActivity(this) -> 0x01
+        isService(this) -> 0x02
+        isFragment(this) -> 0x03
+        isBroadcastReceiver(this) -> 0x04
+        else -> 0x00
+    }
+}

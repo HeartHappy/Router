@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.hearthappy.router.annotations.TargetActivity
+import com.hearthappy.router.exception.HandlerException
+import com.hearthappy.router.exception.NoRouteFoundException
 import com.hearthappy.router.ext.rePathName
 import com.hearthappy.router.ext.reRouterName
 
@@ -22,16 +24,15 @@ object Router {
     }
 
     fun navigate(context: Context, path: String, params: BundleWrapper?) {
-        val routerClass = Class.forName(GENERATE_ROUTER_PATH_PKG.plus(path.rePathName()))
-        val annotation = routerClass.getAnnotation(TargetActivity::class.java) ?: throw IllegalStateException("No route found for path: $path")
-        try {
-            context.startActivity(Intent(context, Class.forName(annotation.name)).apply {
-                params?.let { putExtras(it.toBundle()) }
-            })
-        } catch (e: ClassNotFoundException) {
-            throw RuntimeException(e)
+        if (path.isEmpty()) {
+            throw HandlerException("Parameter is invalid!")
         }
-
+        val routerClass = Class.forName(GENERATE_ROUTER_PATH_PKG.plus(path.rePathName()))
+        val annotation = routerClass.getAnnotation(TargetActivity::class.java) ?: throw NoRouteFoundException("No route found for path ['$path']")
+        Log.d(TAG, "navigate:,${annotation.name.java.name},===${annotation.name.simpleName}")
+        context.startActivity(Intent(context, Class.forName(annotation.name.java.name)).apply {
+            params?.let { putExtras(it.toBundle()) }
+        })
     }
 
     // 参数注入

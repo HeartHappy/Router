@@ -49,24 +49,33 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
         routes.forEach { (path, info) ->
             poetFactory.apply {
                 KSPLog.print("path = $path , class = ${info.clazz}")
-                val pathFileName = "Path$$".plus(path.reRouterName())
-                val pathClassSpec = createClassSpec(pathFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
-                pathClassSpec.addAnnotation(AnnotationSpec.builder(TargetActivity::class).addMember("name = \"${info.clazz}\"").build())
-                pathClassSpec.buildAndWrite(pathFileName, Constant.GENERATE_ROUTER_PATH_PKG, containingFile = info.containingFile!!, codeGenerator)
-                val routerFileName = "Router$$".plus(info.clazz.substringAfterLast('.'))
-                val routerClassSpec = createClassSpec(routerFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
-                routerClassSpec.addSpecProperty("params", CollectionsTypeNames.List.parameterizedBy(RouterTypeNames.RouterParamInfo), null, false, CodeBlock.builder().apply {
-                    add("listOf(")
-                    info.params.forEach {
-                        add("ParamInfo(name = \"${it.name}\", fieldName = \"${it.fieldName}\", type = \"${it.type}\"),\n")
-                    }
-                    add(")")
-                }.build())
-                routerClassSpec.buildAndWrite(routerFileName, Constant.GENERATE_ROUTER_ACT_PKG, containingFile = info.containingFile!!, codeGenerator)
+                generatePath(path, info)
+                generateRouter(info)
             }
         }
     }
 
+    private fun IPoetFactory.generateRouter(info: RouterInfo) {
+        val routerFileName = "Router$$".plus(info.clazz.substringAfterLast('.'))
+        val routerClassSpec = createClassSpec(routerFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
+        routerClassSpec.addSpecProperty("params", CollectionsTypeNames.List.parameterizedBy(RouterTypeNames.RouterParamInfo), null, false, CodeBlock.builder().apply {
+            add("listOf(")
+            info.params.forEach { add("ParamInfo(name = \"${it.name}\", fieldName = \"${it.fieldName}\", type = \"${it.type}\"),\n") }
+            add(")")
+        }.build())
+        routerClassSpec.buildAndWrite(routerFileName, Constant.GENERATE_ROUTER_ACT_PKG, containingFile = info.containingFile!!, codeGenerator)
+    }
+
+    private fun IPoetFactory.generatePath(path: String, info: RouterInfo) {
+        val pathFileName = "Path$$".plus(path.reRouterName())
+        val classPkg = info.clazz.substringBeforeLast('.')
+        val simpleName = info.clazz.substringAfterLast('.')
+        val pathClassSpec = createClassSpec(pathFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
+        pathClassSpec.addAnnotation(AnnotationSpec.builder(TargetActivity::class).addMember("name = ${simpleName}::class").build())
+        val fileSpec = createFileSpec(pathFileName, Constant.GENERATE_ROUTER_PATH_PKG)
+        fileSpec.addImport(classPkg, listOf(simpleName))
+        fileSpec.buildAndWrite(pathClassSpec.build(), info.containingFile!!, codeGenerator)
+    }
 
 
     class RouterVisitor(private val routes: MutableMap<String, RouterInfo>) : KSVisitorVoid() {

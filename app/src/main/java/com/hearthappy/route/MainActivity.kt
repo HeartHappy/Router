@@ -1,6 +1,5 @@
 package com.hearthappy.route
 
-import android.util.Log
 import com.hearthappy.route.base.BaseActivity
 import com.hearthappy.route.databinding.ActivityMainBinding
 import com.hearthappy.router.annotations.Autowired

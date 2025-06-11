@@ -1,1 +1,2 @@
 com.hearthappy.router.compiler.RouterProcessorProvider
+com.hearthappy.router.compiler.InterceptorSymbolProvider

@@ -2,6 +2,7 @@ package com.hearthappy.router.datahandler
 
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSValueArgument
+import com.hearthappy.router.enums.RouteType
 import com.hearthappy.router.ext.RouterTypeNames
 import com.squareup.kotlinpoet.TypeName
 
@@ -111,12 +112,12 @@ fun isBroadcastReceiver(supperClass: TypeName): Boolean {
 }
 
 
-fun TypeName.convertType(): Int {
+fun TypeName.convertType(): String {
     return when {
-        isActivity(this) -> 0x01
-        isService(this) -> 0x02
-        isFragment(this) -> 0x03
-        isBroadcastReceiver(this) -> 0x04
-        else -> 0x00
+        isActivity(this) ->"RouteType.ACTIVITY"
+        isService(this) -> "RouteType.SERVICE"
+        isFragment(this) -> "RouteType.FRAGMENT"
+        isBroadcastReceiver(this) -> "RouteType.BROADCAST"
+        else -> " RouteType.UNKNOWN"
     }
 }

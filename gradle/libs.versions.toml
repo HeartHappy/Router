@@ -26,12 +26,14 @@ adapterVesion = "2.3.0"
 okhttp3Version = "4.9.2"
 
 dataStoreVersion = "1.0.0"
+startupRuntime = "1.1.1"
 toastutilsVersion = "10.3"
 vmaVersion="1.0.3"
 
 [libraries]
 android-basic-ktx = { module = "io.github.hearthappy:android-basic-ktx", version.ref = "androidBasicKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version.ref = "startupRuntime" }
 getactivity-toastutils = { module = "com.github.getActivity:ToastUtils", version.ref = "toastutilsVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

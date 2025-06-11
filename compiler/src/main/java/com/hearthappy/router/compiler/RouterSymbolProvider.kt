@@ -7,46 +7,45 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSVisitorVoid
 import com.google.devtools.ksp.validate
-import com.hearthappy.router.annotations.Autowired
+import com.hearthappy.router.analysis.TargetInterceptor
+import com.hearthappy.router.analysis.TargetObject
+import com.hearthappy.router.annotations.Interceptor
 import com.hearthappy.router.annotations.Route
-import com.hearthappy.router.annotations.TargetActivity
 import com.hearthappy.router.constant.Constant
-import com.hearthappy.router.datahandler.convertType
 import com.hearthappy.router.datahandler.reRouterName
 import com.hearthappy.router.ext.CollectionsTypeNames
 import com.hearthappy.router.ext.RouterTypeNames
 import com.hearthappy.router.generater.IPoetFactory
 import com.hearthappy.router.generater.impl.PoetFactory
 import com.hearthappy.router.logger.KSPLog
-import com.hearthappy.router.model.ParamInfo
+import com.hearthappy.router.model.InterceptorInfo
 import com.hearthappy.router.model.RouterInfo
+import com.hearthappy.router.visitor.InterceptorVisitor
+import com.hearthappy.router.visitor.RouterVisitor
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.ksp.toTypeName
+import kotlin.system.measureTimeMillis
 
 /**
  * Created Date: 2025/6/7
  * @author ChenRui
- * ClassDescription： 解析并生成路由文件
+ * ClassDescription： Parse and generate routing files
  */
-class RouterProcessor(
-    private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory
-) : SymbolProcessor {
+class RouterProcessor(private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory) : SymbolProcessor {
 
     private val routes = mutableMapOf<String, RouterInfo>()
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val routeSymbols = resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!)
-
-        val invalidSymbols = routeSymbols.filter { it.validate() }.toList()
-        if (invalidSymbols.isEmpty()) return emptyList()
-        routeSymbols.filterIsInstance<KSClassDeclaration>()
-            .forEach { it.accept(RouterVisitor(routes), Unit) }
-
-        generateRouterTable()
+        val measureTimeMillis = measureTimeMillis {
+            val routeSymbols = resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!)
+            val invalidSymbols = routeSymbols.filter { it.validate() }.toList()
+            if(invalidSymbols.isEmpty())return emptyList()
+            routeSymbols.filterIsInstance<KSClassDeclaration>().forEach { it.accept(RouterVisitor(routes), Unit) }
+            generateRouterTable()
+        }
+        KSPLog.printRouterTook(routes.size, measureTimeMillis)
         return emptyList()
     }
 
@@ -56,94 +55,37 @@ class RouterProcessor(
                 KSPLog.print("path = $path , class = ${info.clazz}")
                 generatePath(path, info)
                 generateRouter(info)
+
             }
         }
     }
 
+
     private fun IPoetFactory.generateRouter(info: RouterInfo) {
         val routerFileName = "Router$$".plus(info.clazz.substringAfterLast('.'))
-        val routerClassSpec = createClassSpec(
-            routerFileName,
-            superClassName = null,
-            constructorParameters = emptyList(),
-            isAddConstructorProperty = false
-        )
-        routerClassSpec.addSpecProperty(
-            "params",
-            CollectionsTypeNames.List.parameterizedBy(RouterTypeNames.RouterParamInfo),
-            null,
-            false,
-            CodeBlock.builder().apply {
+        val routerClassSpec = createClassSpec(routerFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
+        routerClassSpec.addSpecProperty("params", CollectionsTypeNames.List.parameterizedBy(RouterTypeNames.RouterParamInfo), null, false, CodeBlock.builder().apply {
+            if (info.params.isEmpty()) {
+                add("listOf()")
+            } else {
                 add("listOf(")
-                info.params.forEach { add("ParamInfo(name = \"${it.name}\", fieldName = \"${it.fieldName}\", type = \"${it.type}\"),\n") }
+                info.params.forEach { add("\nParamInfo(\n\tname = \"${it.name}\", \n\tfieldName = \"${it.fieldName}\", \n\ttype = \"${it.type}\"),\n") }
                 add(")")
-            }.build()
-        )
-        routerClassSpec.buildAndWrite(
-            routerFileName,
-            Constant.GENERATE_ROUTER_ACT_PKG,
-            containingFile = info.containingFile!!,
-            codeGenerator
-        )
+            }
+        }.build())
+        routerClassSpec.buildAndWrite(routerFileName, Constant.GENERATE_ROUTER_ROUTES_PKG, containingFile = info.containingFile!!, codeGenerator)
     }
 
     private fun IPoetFactory.generatePath(path: String, info: RouterInfo) {
         val pathFileName = "Path$$".plus(path.reRouterName())
         val classPkg = info.clazz.substringBeforeLast('.')
         val simpleName = info.clazz.substringAfterLast('.')
-        val pathClassSpec = createClassSpec(
-            pathFileName,
-            superClassName = null,
-            constructorParameters = emptyList(),
-            isAddConstructorProperty = false
-        )
-        pathClassSpec.addAnnotation(
-            AnnotationSpec.builder(TargetActivity::class).addMember("name = ${simpleName}::class")
-                .addMember("type = ${info.supperType}")
-                .build()
-        )
+        val pathClassSpec = createClassSpec(pathFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
+        pathClassSpec.addAnnotation(AnnotationSpec.builder(TargetObject::class).addMember("%L::class", simpleName).addMember("%L", info.supperType).build())
         val fileSpec = createFileSpec(pathFileName, Constant.GENERATE_ROUTER_PATH_PKG)
         fileSpec.addImport(classPkg, listOf(simpleName))
+        fileSpec.addImport(RouterTypeNames.RouteType.packageName, RouterTypeNames.RouteType.simpleName)
         fileSpec.buildAndWrite(pathClassSpec.build(), info.containingFile!!, codeGenerator)
-    }
-
-
-    class RouterVisitor(private val routes: MutableMap<String, RouterInfo>) : KSVisitorVoid() {
-        override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
-            super.visitClassDeclaration(classDeclaration, data)
-            processRouteClass(classDeclaration)
-        }
-
-        private fun processRouteClass(classDeclaration: KSClassDeclaration) {
-            val routeAnnotation =
-                classDeclaration.annotations.first { it.annotationType.resolve().declaration.qualifiedName?.asString() == Route::class.qualifiedName }
-
-            val path =
-                routeAnnotation.arguments.first { it.name?.asString() == "path" }.value as String
-
-            val className = classDeclaration.qualifiedName?.asString() ?: return
-            val routerInfo = RouterInfo()
-            routerInfo.clazz = className
-            routerInfo.containingFile = classDeclaration.containingFile
-            routerInfo.supperType = classDeclaration.superTypes.first().toTypeName().convertType()
-            classDeclaration.getAllProperties().forEach { property ->
-                property.annotations.forEach { annotation ->
-                    if (annotation.annotationType.resolve().declaration.qualifiedName?.asString() == Autowired::class.qualifiedName) {
-                        val name =
-                            annotation.arguments.firstOrNull { it.name?.asString() == "name" }?.value as? String
-                        val fieldName = property.simpleName.asString()
-                        val paramName = name?.takeIf { it.isNotEmpty() }?.run { this } ?: fieldName
-                        val paramInfo = ParamInfo(
-                            name = paramName,
-                            fieldName = fieldName,
-                            type = property.type.resolve().declaration.qualifiedName?.asString() ?: ""
-                        )
-                        routerInfo.params.add(paramInfo)
-                    }
-                }
-            }
-            routes[path] = routerInfo
-        }
     }
 
 

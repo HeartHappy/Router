@@ -14,9 +14,21 @@
         android:textSize="18sp"
         android:layout_height="match_parent"/>
     <Button
-        android:id="@+id/btnJump"
+        android:id="@+id/btnJump1"
         android:layout_width="match_parent"
-        android:text="Jump to Module 2"
+        android:text="Jump to Module 2,Release Interceptor"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@+id/btnJump2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnJump2"
+        android:layout_width="match_parent"
+        android:textAllCaps="false"
+        android:text="Jump to Module 2,Interrupt other interceptors"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
+
+    <application>
+        <!-- app startup.所需provider -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge"> <!-- InitializationProvider禁用所有组件的自动初始化：在provider中添加：tools:node="remove" -->
+            <!-- This entry makes ExampleLoggerInitializer discoverable. -->
+            <meta-data
+                android:name="com.hearthappy.router.initializer.RouterInitializer"
+                android:value="androidx.startup" /> <!-- 禁用AppInitializer启用：在meta-data中添加:tools:node="remove" -->
+        </provider>
+    </application>
 </manifest>

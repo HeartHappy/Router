@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.hearthappy.mylibrary2.databinding.ActivityRouter2Binding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
-import com.hearthappy.router.core.BundleWrapper
 import com.hearthappy.router.core.Router
 
 
@@ -21,11 +20,9 @@ import com.hearthappy.router.core.Router
         Router.inject(this)
         setContentView(viewBinding.root)
         viewBinding.apply {
-            tvTitle.text = name
+            if (name.isNotEmpty()) tvTitle.text = name
             btnJump.setOnClickListener {
-                Router.navigate(this@Router2Activity,"/launcher/main", BundleWrapper().apply {
-                    putString("name","From the Router2Activity in the module")
-                })
+                Router.with(this@Router2Activity).build("/launcher/main").withString("name", "From the Router2Activity in the module").navigation()
             }
         }
     }

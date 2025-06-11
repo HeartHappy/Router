@@ -11,15 +11,14 @@
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
         android:text="I am module 2"
-        android:textSize="28sp" />
+        style="@style/style_title" />
 
     <Button
         android:id="@+id/btnJump"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Jump to Module 1"
+        android:text="Jump to APP"
         android:textAllCaps="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

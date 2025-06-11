@@ -4,21 +4,22 @@ object Constant {
 
 
     //生成路径
-    const val GENERATE_ROUTER_PATH_PKG = "com.hearthappy.router.generate.path"
-    const val GENERATE_ROUTER_ACT_PKG = "com.hearthappy.router.generate.act"
+    internal const val GENERATE_ROUTER_PATH_PKG = "com.hearthappy.router.generate.path"
+    internal const val GENERATE_ROUTER_ROUTES_PKG = "com.hearthappy.router.generate.routes"
+    internal const val GENERATE_ROUTER_INTERCEPTOR_PKG = "com.hearthappy.router.generate.interceptor."
 
     //应用包
-    const val APPLICATION_PKG = "android.app"
-    const val CONTEXT_PKG = "android.content"
-    const val INTERFACE_PKG="com.hearthappy.router.interfaces"
+    internal const val APPLICATION_PKG = "android.app"
+    internal const val CONTEXT_PKG = "android.content"
+    internal const val INTERFACE_PKG="com.hearthappy.router.interfaces"
 
     //类名
-    const val APPLICATION = "Application"
-    const val CONTEXT = "Context"
+    internal const val APPLICATION = "Application"
+    internal const val CONTEXT = "Context"
 
     //其他常用命名
-    const val APP = "app"
+    internal const val APP = "app"
 
     //转义符
-    const val INDENTATION = "\t"
+    internal const val INDENTATION = "\t"
 }

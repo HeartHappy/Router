@@ -1,6 +1,5 @@
 package com.hearthappy.router.ext
 
-import com.hearthappy.router.annotations.TargetActivity
 import com.hearthappy.router.constant.Constant
 import com.hearthappy.router.constant.Constant.APPLICATION
 import com.hearthappy.router.constant.Constant.APPLICATION_PKG
@@ -18,15 +17,16 @@ object AndroidTypeNames {
 }
 
 object RouterTypeNames {
-    internal val IRouterTable = ClassName(Constant.INTERFACE_PKG, "IRouterTable")
     internal val Router = ClassName("com.hearthappy.router.core.Router", "Router")
-    internal val RouterParamInfo = ClassName("com.hearthappy.router.core.Router", "ParamInfo")
+    internal val RouterParamInfo = ClassName("com.hearthappy.router.enums", "ParamInfo")
     internal val TargetActivity=ClassName("com.hearthappy.router.annotations", "TargetActivity")
     internal val AppCompatActivity=ClassName("androidx.appcompat.app",  "AppCompatActivity")
     internal val Activity=ClassName("android.app", "Activity")
     internal val Service=ClassName("android.app", "Service")
     internal val Fragment=ClassName("androidx.fragment.app", "Fragment")
     internal val BroadcastReceiver=ClassName("android.content", "BroadcastReceiver")
+    internal val RouteType=ClassName("com.hearthappy.router.enums", "RouteType")
+    internal val Interceptor = ClassName(" com.hearthappy.router.generate.interceptor", "Interceptor$$".plus("Group"))
 }
 
 object CollectionsTypeNames{

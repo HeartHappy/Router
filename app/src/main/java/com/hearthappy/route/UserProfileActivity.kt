@@ -2,9 +2,9 @@ package com.hearthappy.route
 
 import com.hearthappy.route.base.BaseActivity
 import com.hearthappy.route.databinding.ActivityUserProfileBinding
+import com.hearthappy.route.interceptor.ActivityInterceptor
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
-import com.hearthappy.router.core.BundleWrapper
 import com.hearthappy.router.core.Router
 
 @Route(path = "/user/profile")
@@ -24,10 +24,13 @@ class UserProfileActivity : BaseActivity<ActivityUserProfileBinding>() {
     }
 
     override fun ActivityUserProfileBinding.initListener() {
-        btnJump.setOnClickListener {
-            Router.navigate(this@UserProfileActivity, "/model/ui",  BundleWrapper().apply {
-                putString("name",  "From the UserProfileActivity in the app")
-            })
+        btnJump1.setOnClickListener {
+            ActivityInterceptor.interceptorSwitch = false
+            Router.with(this@UserProfileActivity).build("/model/ui").withString("name", "From the UserProfileActivity in the app").navigation()
+        }
+        btnJump2.setOnClickListener {
+            ActivityInterceptor.interceptorSwitch = true
+            Router.with(this@UserProfileActivity).build("/model/ui").withString("name", "From the UserProfileActivity in the app").navigation()
         }
     }
 

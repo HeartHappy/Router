@@ -1,10 +1,13 @@
 package com.hearthappy.router.datahandler
 
+import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.KSAnnotation
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSValueArgument
-import com.hearthappy.router.enums.RouteType
+import com.hearthappy.router.constant.Constant
 import com.hearthappy.router.ext.RouterTypeNames
 import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.ksp.toClassName
 
 
 fun <R : Any> List<KSValueArgument>.findArgsValue(paramName: String): R {
@@ -111,13 +114,24 @@ fun isBroadcastReceiver(supperClass: TypeName): Boolean {
     return supperClass.toString().contains(RouterTypeNames.BroadcastReceiver.simpleName)
 }
 
-
-fun TypeName.convertType(): String {
-    return when {
-        isActivity(this) ->"RouteType.ACTIVITY"
-        isService(this) -> "RouteType.SERVICE"
-        isFragment(this) -> "RouteType.FRAGMENT"
-        isBroadcastReceiver(this) -> "RouteType.BROADCAST"
-        else -> " RouteType.UNKNOWN"
-    }
+fun isServiceProvider(supperClass: TypeName):Boolean{
+    return  RouterTypeNames.ServiceProvider.javaClass.isAssignableFrom(supperClass.javaClass)
 }
+
+
+// 类型转换逻辑
+fun KSClassDeclaration.convertType(): String {
+    for (allSuperType in getAllSuperTypes()) {
+        val className = allSuperType.toClassName()
+        when (className) {
+            RouterTypeNames.ServiceProvider -> return Constant.ROUTER_TYPE_SERVICE_PROVIDER
+            RouterTypeNames.AppCompatActivity, RouterTypeNames.Activity -> return Constant.ROUTER_TYPE_ACTIVITY
+            RouterTypeNames.Service -> return Constant.ROUTER_TYPE_SERVICE
+            RouterTypeNames.Fragment -> return Constant.ROUTER_TYPE_FRAGMENT
+            RouterTypeNames.BroadcastReceiver -> return Constant.ROUTER_TYPE_BROADCAST
+        }
+
+    }
+    return "RouteType.UNKNOWN"
+}
+

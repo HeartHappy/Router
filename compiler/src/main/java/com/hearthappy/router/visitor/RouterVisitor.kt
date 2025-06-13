@@ -1,5 +1,6 @@
 package com.hearthappy.router.visitor
 
+import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
 import com.hearthappy.router.annotations.Autowired
@@ -24,7 +25,7 @@ class RouterVisitor(private val routes: MutableMap<String, RouterInfo>) : KSVisi
         val routerInfo = RouterInfo()
         routerInfo.clazz = className
         routerInfo.containingFile = classDeclaration.containingFile
-        routerInfo.supperType = classDeclaration.superTypes.first().toTypeName().convertType()
+        routerInfo.supperType = classDeclaration.convertType()
         classDeclaration.getAllProperties().forEach { property ->
             property.annotations.forEach { annotation ->
                 if (annotation.annotationType.resolve().declaration.qualifiedName?.asString() == Autowired::class.qualifiedName) {

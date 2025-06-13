@@ -18,8 +18,8 @@ object Router {
     /**
      * initialize routing related services
      */
-    internal fun init() {
-        _mailman.initInterceptorService()
+    internal fun init(context: Context) {
+        _mailman.appInit(context)
     }
 
     fun with(context: Context): Mailman {
@@ -30,4 +30,5 @@ object Router {
     fun inject(activity: Activity) {
         _mailman.inject(activity)
     }
+
 }

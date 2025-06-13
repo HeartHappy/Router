@@ -4,5 +4,5 @@ package com.hearthappy.router.annotations
 @Retention(AnnotationRetention.SOURCE)
 annotation class Route(
     val path: String,
-    val group: String = "default"
+    val name: String = ""
 )

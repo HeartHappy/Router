@@ -4,13 +4,15 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray
 import java.io.Serializable
+import java.lang.reflect.Type
+import kotlin.reflect.KClass
 
 
 interface IDirector {
 
     fun addFlags(flags: Int): IDirector
 
-    fun withAction(action: String):IDirector
+    fun withAction(action: String): IDirector
 
     fun withObject(key: String, value: Any): IDirector
 
@@ -65,4 +67,7 @@ interface IDirector {
     fun withBundle(key: String, bundle: Bundle): IDirector
 
     fun navigation()
+
+    fun <T> getInstance(instance:Class<T>): T?
+
 }

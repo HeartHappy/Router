@@ -14,7 +14,7 @@ import com.hearthappy.router.core.BuildConfig
 class RouterInitializer : Initializer<ServiceInitializer> {
     override fun create(context: Context): ServiceInitializer {
         if (BuildConfig.DEBUG) Log.d(this::class.java.simpleName, "Router Initializer...")
-        return ServiceInitializer()
+        return ServiceInitializer(context)
     }
 
     override fun dependencies(): List<Class<out Initializer<*>>> {

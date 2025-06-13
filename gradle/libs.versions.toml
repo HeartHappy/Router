@@ -24,11 +24,13 @@ kotlinpoetKsp = "1.12.0"
 converterGsonVersion = "2.9.0"
 adapterVesion = "2.3.0"
 okhttp3Version = "4.9.2"
+gsonVersion = "2.9.0"
 
 dataStoreVersion = "1.0.0"
 startupRuntime = "1.1.1"
 toastutilsVersion = "10.3"
 vmaVersion="1.0.3"
+
 
 [libraries]
 android-basic-ktx = { module = "io.github.hearthappy:android-basic-ktx", version.ref = "androidBasicKtx" }
@@ -57,16 +59,16 @@ devtools-ksp = { group = "com.google.devtools.ksp", name = "symbol-processing-ap
 squareup-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "converterGsonVersion" }
 squareup-adapter-rxjava2 = { group = "com.squareup.retrofit2", name = "adapter-rxjava2", version.ref = "adapterVesion" }
 squareup-okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp3Version" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
 
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStoreVersion" }
 datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "dataStoreVersion" }
 
-#github-vma-annotations = { module = "com.github.HeartHappy.ViewModelAutomationX:annotations", version.ref = "vmaVersion" }
-#github-vma-processor = { module = "com.github.HeartHappy.ViewModelAutomationX:processor", version.ref = "vmaVersion" }
-#github-vma-ktx = { module = "com.github.HeartHappy.ViewModelAutomationX:vma-ktx", version.ref = "vmaVersion" }
 hearthappy-vma-annotations = { module = "io.github.hearthappy:vma-annotations", version.ref = "vmaVersion" }
 hearthappy-vma-processor = { module = "io.github.hearthappy:vma-processor", version.ref = "vmaVersion" }
 hearthappy-vma-ktx = { module  = "io.github.hearthappy:vma-ktx", version.ref = "vmaVersion" }
+
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -7,5 +7,6 @@ enum class RouteType {
     BROADCAST,
     CONTENT_PROVIDER,
     METHOD,
+    SERVICE_PROVIDER,
     UNKNOWN
 }

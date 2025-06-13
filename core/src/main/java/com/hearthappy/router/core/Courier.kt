@@ -5,6 +5,7 @@ import android.util.Log
 import com.hearthappy.router.core.Mailman.Companion.GENERATE_ROUTER_ACTIVITY_PKG
 import com.hearthappy.router.enums.ParamInfo
 import com.hearthappy.router.ext.reRouterName
+import com.hearthappy.router.service.SerializationService
 
 internal class Courier {
 
@@ -30,7 +31,20 @@ internal class Courier {
                     "boolean" -> field.setBoolean(activity, value as? Boolean ?: false)
                     "float" -> field.setFloat(activity, value as? Float ?: 0f)
                     "double" -> field.setDouble(activity, value as? Double ?: 0.0)
-                    else -> field.set(activity, value)
+                    else -> { // 处理复杂对象类型
+                        if (value is String) {
+                            try { // 尝试将字符串解析为JSON对象
+                                val clazz = Class.forName(paramInfo.type)
+                                val serializationService = Router.with(activity).getInstance(SerializationService::class.java) // 假设您使用了JSON解析库，如Gson或FastJSON
+                                serializationService?.fromJson<Any>(value, clazz).run { field.set(activity, this) }
+                            } catch (e: Exception) {
+                                Log.e("Router", "Failed to parse JSON for field: ${paramInfo.fieldName}", e) // 如果解析失败，尝试直接设置原始值
+                                field.set(activity, value)
+                            }
+                        } else { // 对于其他类型，尝试直接设置
+                            field.set(activity, value)
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("Router", "Failed to inject field: ${paramInfo.fieldName}", e)

@@ -8,9 +8,8 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.validate
-import com.hearthappy.router.analysis.TargetInterceptor
 import com.hearthappy.router.analysis.TargetObject
-import com.hearthappy.router.annotations.Interceptor
+import com.hearthappy.router.analysis.TargetServiceProvider
 import com.hearthappy.router.annotations.Route
 import com.hearthappy.router.constant.Constant
 import com.hearthappy.router.datahandler.reRouterName
@@ -19,12 +18,11 @@ import com.hearthappy.router.ext.RouterTypeNames
 import com.hearthappy.router.generater.IPoetFactory
 import com.hearthappy.router.generater.impl.PoetFactory
 import com.hearthappy.router.logger.KSPLog
-import com.hearthappy.router.model.InterceptorInfo
 import com.hearthappy.router.model.RouterInfo
-import com.hearthappy.router.visitor.InterceptorVisitor
 import com.hearthappy.router.visitor.RouterVisitor
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import kotlin.system.measureTimeMillis
 
@@ -41,7 +39,7 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
         val measureTimeMillis = measureTimeMillis {
             val routeSymbols = resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!)
             val invalidSymbols = routeSymbols.filter { it.validate() }.toList()
-            if(invalidSymbols.isEmpty())return emptyList()
+            if (invalidSymbols.isEmpty()) return emptyList()
             routeSymbols.filterIsInstance<KSClassDeclaration>().forEach { it.accept(RouterVisitor(routes), Unit) }
             generateRouterTable()
         }
@@ -52,12 +50,31 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
     private fun generateRouterTable() {
         routes.forEach { (path, info) ->
             poetFactory.apply {
-                KSPLog.print("path = $path , class = ${info.clazz}")
-                generatePath(path, info)
-                generateRouter(info)
-
+                KSPLog.print("path = $path , class = ${info.clazz},supper:${info.supperType}")
+                when (info.supperType) {
+                    Constant.ROUTER_TYPE_ACTIVITY -> {
+                        generatePath(path, info)
+                        generateRouter(info)
+                    }
+                    Constant.ROUTER_TYPE_SERVICE_PROVIDER -> {
+                        generateProvider(info)
+                    }
+                    else -> {}
+                }
             }
         }
+        routes.clear()
+    }
+
+    private fun generateProvider(info: RouterInfo) {
+        val providerFileName = "Provider$$".plus("Json")
+        val classPkg = info.clazz.substringBeforeLast('.')
+        val simpleName = info.clazz.substringAfterLast('.')
+        poetFactory.apply {
+            val classSpec = createClassSpec(providerFileName).addAnnotation(AnnotationSpec.builder(TargetServiceProvider::class).addMember("%L::class", info.clazz.substringAfterLast('.')).build())
+            createFileSpec(providerFileName, Constant.GENERATE_ROUTER_PROVIDER_PKG).addImport(classPkg, listOf(simpleName)).buildAndWrite(classSpec.build(), info.containingFile!!, codeGenerator)
+        }
+
     }
 
 

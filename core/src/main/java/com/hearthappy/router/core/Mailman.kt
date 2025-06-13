@@ -8,6 +8,7 @@ import android.os.Parcelable
 import android.util.Log
 import android.util.SparseArray
 import com.hearthappy.router.analysis.TargetObject
+import com.hearthappy.router.analysis.TargetServiceProvider
 import com.hearthappy.router.enums.RouteType
 import com.hearthappy.router.exception.HandlerException
 import com.hearthappy.router.exception.NoRouteFoundException
@@ -15,6 +16,8 @@ import com.hearthappy.router.ext.rePathName
 import com.hearthappy.router.interfaces.IDirector
 import com.hearthappy.router.interfaces.InterceptorCallback
 import com.hearthappy.router.service.InterceptorService
+import com.hearthappy.router.service.SerializationService
+import com.hearthappy.router.service.ServiceProvider
 import com.hearthappy.router.service.impl.InterceptorServiceImpl
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicBoolean
@@ -35,15 +38,23 @@ class Mailman : IDirector {
     private var flags: Int = 0
     private var action: String = ""
     private val bundle by lazy { Bundle() }
+    private var appContext: Context? = null
     private var context: Context? = null
 
     private val _courier: Courier by lazy { Courier() }
     private val interceptorService: InterceptorService by lazy { InterceptorServiceImpl() }
+    private var serviceProvider: ServiceProvider? = null
+    private var serializationService: SerializationService? = null
 
 
-    fun initInterceptorService() {
+    fun appInit(context: Context) {
+        appContext=context
+        initInterceptorService()
+    }
+   private fun initInterceptorService() {
         interceptorService.init()
     }
+
 
     fun inject(activity: Activity) {
         _courier.distribution(activity)
@@ -81,7 +92,9 @@ class Mailman : IDirector {
     }
 
     override fun withObject(key: String, value: Any): IDirector {
-        TODO("Not yet implemented")
+        serializationService= Router.with(appContext!!).getInstance(SerializationService::class.java)
+        serializationService?.let { bundle.putString(key, it.toJson(value))}?:throw HandlerException("SerializationService is null")
+        return this
     }
 
     override fun withString(key: String, value: String): IDirector {
@@ -210,6 +223,7 @@ class Mailman : IDirector {
         return this
     }
 
+
     override fun navigation() {
         val shouldContinue = AtomicBoolean(true)
         for (record in interceptorService.getRouterInterceptors()) {
@@ -235,7 +249,7 @@ class Mailman : IDirector {
         try {
             val routerClass = Class.forName(GENERATE_ROUTER_PATH_PKG.plus(path.rePathName()))
             val tb = routerClass.getAnnotation(TargetObject::class.java) ?: throw NoRouteFoundException("No route found for path ['$path']")
-            val currentContext = context ?: throw HandlerException("context is null")
+            val currentContext = context ?: appContext ?: throw HandlerException("context is null")
             when (tb.routeType) {
                 RouteType.ACTIVITY -> {
                     val intent = Intent(currentContext, tb.name.java).apply {
@@ -268,6 +282,9 @@ class Mailman : IDirector {
                 RouteType.METHOD -> {
                     TODO()
                 }
+                RouteType.SERVICE_PROVIDER -> {
+                    TODO()
+                }
                 RouteType.UNKNOWN -> {
                     TODO()
                 }
@@ -278,6 +295,19 @@ class Mailman : IDirector {
     }
 
 
+    @Suppress("UNCHECKED_CAST") override fun <T> getInstance(instance: Class<T>): T? {
+        when (instance.javaClass) {
+            SerializationService::class.java.javaClass -> {
+                val routerClass = Class.forName(GENERATE_ROUTER_PROVIDER_PKG.plus("Provider$$").plus("Json"))
+                val tb = routerClass.getAnnotation(TargetServiceProvider::class.java) ?: throw NoRouteFoundException("No route found for path ['$path']")
+                val newInstance = tb.clazz.java.newInstance()
+                return newInstance as T
+            }
+            else -> {}
+        }
+        return null
+    }
+
     private fun completed() {
         enterAnim = -1
         exitAnim = -1
@@ -285,6 +315,7 @@ class Mailman : IDirector {
         flags = 0
         action = ""
         bundle.clear()
+        context = null
     }
 
 
@@ -293,6 +324,7 @@ class Mailman : IDirector {
         private const val GENERATE_ROUTER_PATH_PKG = "com.hearthappy.router.generate.path."
         internal const val GENERATE_ROUTER_ACTIVITY_PKG = "com.hearthappy.router.generate.routes."
         internal const val GENERATE_ROUTER_INTERCEPTOR_PKG = "com.hearthappy.router.generate.interceptor."
+        internal const val GENERATE_ROUTER_PROVIDER_PKG = "com.hearthappy.router.generate.provider."
     }
 
 }

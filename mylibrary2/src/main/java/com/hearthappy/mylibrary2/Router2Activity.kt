@@ -22,7 +22,7 @@ import com.hearthappy.router.core.Router
         viewBinding.apply {
             if (name.isNotEmpty()) tvTitle.text = name
             btnJump.setOnClickListener {
-                Router.with(this@Router2Activity).build("/launcher/main").withString("name", "From the Router2Activity in the module").navigation()
+                Router.build("/launcher/main").withString("name", "From the Router2Activity in the module").navigation()
             }
         }
     }

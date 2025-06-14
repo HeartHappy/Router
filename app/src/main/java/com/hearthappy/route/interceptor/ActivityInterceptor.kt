@@ -1,5 +1,6 @@
 package com.hearthappy.route.interceptor
 
+import android.util.Log
 import android.widget.Toast
 import com.hearthappy.route.R
 import com.hearthappy.router.annotations.Interceptor

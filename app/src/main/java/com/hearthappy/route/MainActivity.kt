@@ -22,7 +22,7 @@ import com.hearthappy.router.core.Router
 
     override fun ActivityMainBinding.initListener() {
         btnJump.setOnClickListener { // 带参数跳转
-            Router.with(this@MainActivity).build(RouterPath.USER_PROFILE_ACTIVITY).withObject("user", UserBean("Labubu", "987654321")).withString("username", "Hello KSP Router!").withInt("user_id", 123456).withBoolean("isPremium", true).navigation()
+            Router.build(RouterPath.USER_PROFILE_ACTIVITY).withObject("user", UserBean("Labubu", "987654321")).withString("username", "Hello KSP Router!").withInt("user_id", 123456).withBoolean("isPremium", true).navigation()
         }
     }
 

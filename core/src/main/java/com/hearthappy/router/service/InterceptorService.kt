@@ -9,7 +9,7 @@ import com.hearthappy.router.service.impl.InterceptorServiceImpl
  */
 interface InterceptorService {
 
-    fun init()
+    fun init(classLoaderService : ClassLoaderService)
 
     fun addRouterInterceptor(interceptor: InterceptorServiceImpl.InterceptorRecord)
 

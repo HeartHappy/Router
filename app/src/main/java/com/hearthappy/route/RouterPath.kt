@@ -7,4 +7,5 @@ object RouterPath {
     const val MODEL_UI = "/model/ui"
     const val MODEL2_UI = "/model2/ui"
     const val SERVICE_JSON="/service/json"
+    const val MODEL_FRAGMENT="/model/fragment"
 }

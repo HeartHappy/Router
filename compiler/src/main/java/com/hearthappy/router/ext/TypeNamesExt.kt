@@ -27,7 +27,7 @@ object RouterTypeNames {
     internal val BroadcastReceiver=ClassName("android.content", "BroadcastReceiver")
     internal val RouteType=ClassName("com.hearthappy.router.enums", "RouteType")
     internal val Interceptor = ClassName(" com.hearthappy.router.generate.interceptor", "Interceptor$$".plus("Group"))
-    internal val ServiceProvider=ClassName("com.hearthappy.router.service", "ServiceProvider")
+    internal val ServiceProvider=ClassName("com.hearthappy.router.service", "SerializationService")
 }
 
 object CollectionsTypeNames{

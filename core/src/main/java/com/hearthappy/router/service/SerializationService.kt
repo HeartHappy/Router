@@ -2,7 +2,7 @@ package com.hearthappy.router.service
 
 import java.lang.reflect.Type
 
-interface SerializationService:ServiceProvider {
+interface SerializationService {
     /**
      * Object to json
      *

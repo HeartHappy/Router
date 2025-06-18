@@ -4,7 +4,32 @@
     <application>
         <activity
             android:name=".Router2Activity"
-            android:exported="false" />
+            android:launchMode="singleTop"
+            android:exported="true" >
+            <intent-filter>
+                <data
+                    android:host="kotlin.ksp.com"
+                    android:scheme="hearthappy" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+
+            <!-- 支持深度链接（Deep Link），适配Android App Links -->
+            <intent-filter>
+                <data
+                    android:host="kotlin.ksp.com"
+                    android:pathPrefix="/hearthappy"
+                    android:scheme="https" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

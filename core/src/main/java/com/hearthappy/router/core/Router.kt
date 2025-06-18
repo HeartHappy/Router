@@ -1,6 +1,7 @@
 package com.hearthappy.router.core
 
 import android.content.Context
+import android.net.Uri
 import com.hearthappy.router.interfaces.IDirector
 
 /**
@@ -28,6 +29,10 @@ object Router {
 
     fun build(path : String) : IDirector {
         return _mailman.build(path)
+    }
+
+    fun build(uri:Uri):IDirector{
+        return _mailman.build(uri)
     }
 
     // 参数注入

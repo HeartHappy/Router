@@ -9,7 +9,6 @@
     tools:context=".RouterActivity">
 
 
-
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
@@ -17,6 +16,16 @@
         android:gravity="center"
         android:text="I am module 1"
         android:textSize="28sp" />
+
+    <Button
+        android:id="@+id/btnUriJump"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Uri Jump to Module 2"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@+id/btnJump"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnJump"

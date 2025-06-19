@@ -24,7 +24,8 @@ import kotlin.system.measureTimeMillis
  */
 class InterceptorSymbolProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-        KSPLog.init(environment.logger)
+        val enableLog = environment.options["enableRouterLog"]?.toBoolean() ?: false
+        if (enableLog) KSPLog.init(environment.logger)
         return InterceptorProcessor(environment.codeGenerator, PoetFactory())
     }
 

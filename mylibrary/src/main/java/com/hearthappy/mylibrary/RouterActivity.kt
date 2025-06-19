@@ -3,6 +3,7 @@ package com.hearthappy.mylibrary
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityOptionsCompat
 import com.hearthappy.mylibrary.databinding.ActivityRouterBinding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
@@ -22,14 +23,16 @@ import com.hearthappy.router.core.Router
         setContentView(viewBinding.root)
         viewBinding.apply {
             if (name.isNotEmpty()) tvTitle.text = name
-            btnJump.setOnClickListener {
-                Router.build("/model2/ui").withString("name", "KSP Router!").withInt("age",18).navigation()
-            }
-            btnUriJump.setOnClickListener {
-                //uri Use %20 to replace spaces.
+
+            btnUriJump.setOnClickListener { //uri Use %20 to replace spaces.
                 //adb shell am start -a android.intent.action.VIEW -d  "hearthappy://kotlin.ksp.com/model2/ui?name=KSP%20Router!\&age=18"
                 val uri = Uri.parse("hearthappy://kotlin.ksp.com/model2/ui?name=KSP Router!&age=18")
                 Router.build(uri).navigation()
+            }
+
+            btnJump.setOnClickListener {
+                val optionsCompat = ActivityOptionsCompat.makeClipRevealAnimation(root, root.width / 2, root.height / 2, root.width, root.height)
+                Router.build("/model2/ui").withString("name", "KSP Router!").withInt("age", 18).withOptionsCompat(optionsCompat).navigation()
             }
         }
     }

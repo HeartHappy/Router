@@ -1,6 +1,5 @@
 package com.hearthappy.router.ext
 
-import com.hearthappy.router.constant.Constant
 import com.hearthappy.router.constant.Constant.APPLICATION
 import com.hearthappy.router.constant.Constant.APPLICATION_PKG
 import com.hearthappy.router.constant.Constant.CONTEXT
@@ -27,7 +26,8 @@ object RouterTypeNames {
     internal val BroadcastReceiver=ClassName("android.content", "BroadcastReceiver")
     internal val RouteType=ClassName("com.hearthappy.router.enums", "RouteType")
     internal val Interceptor = ClassName(" com.hearthappy.router.generate.interceptor", "Interceptor$$".plus("Group"))
-    internal val ServiceProvider=ClassName("com.hearthappy.router.service", "SerializationService")
+    internal val SerializationService=ClassName("com.hearthappy.router.service", "SerializationService")
+    internal val PathReplaceService=ClassName("com.hearthappy.router.service", "PathReplaceService")
 }
 
 object CollectionsTypeNames{

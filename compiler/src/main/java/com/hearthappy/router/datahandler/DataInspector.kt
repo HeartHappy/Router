@@ -1,12 +1,40 @@
 package com.hearthappy.router.datahandler
 
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSAnnotation
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.hearthappy.router.ext.RouterTypeNames.Activity
+import com.hearthappy.router.ext.RouterTypeNames.BroadcastReceiver
+import com.hearthappy.router.ext.RouterTypeNames.Fragment
+import com.hearthappy.router.ext.RouterTypeNames.PathReplaceService
+import com.hearthappy.router.ext.RouterTypeNames.SerializationService
+import com.hearthappy.router.ext.RouterTypeNames.Service
+import com.squareup.kotlinpoet.TypeName
 import java.util.regex.Pattern
 
-object DataCheck {
+object DataInspector {
+    const val EMPTY_STRING=""
 
+    // 扩展函数：判断一个类是否是另一个类的子类
+    fun isActivity(supperClass: TypeName): Boolean {
+        return supperClass.toString().contains(Activity.simpleName)
+    }
+
+    fun isService(supperClass: TypeName): Boolean {
+        return supperClass.toString().contains(Service.simpleName)
+    }
+
+    fun isFragment(supperClass: TypeName): Boolean {
+        return supperClass.toString().contains(Fragment.simpleName)
+    }
+
+    fun isBroadcastReceiver(supperClass: TypeName): Boolean {
+        return supperClass.toString().contains(BroadcastReceiver.simpleName)
+    }
+
+    fun isServiceProvider(supperClass: KSClassDeclaration):Boolean{
+        return  TypeComparator.isSameType(supperClass, SerializationService) || TypeComparator.isSameType(supperClass, PathReplaceService)
+    }
     fun isParameter(paramName: String?, paramType: String) = !(paramName == "other" || paramType == "Any")
 
 

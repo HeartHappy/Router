@@ -16,9 +16,9 @@ class KSPLog {
             val minutes = seconds / 60
             val remainingSeconds = seconds % 60
             return when {
-                minutes > 0          -> "%d m %d s %d ms".format(minutes, remainingSeconds, remainingMilliseconds)
+                minutes > 0 -> "%d m %d s %d ms".format(minutes, remainingSeconds, remainingMilliseconds)
                 remainingSeconds > 0 -> "%d s %d ms".format(remainingSeconds, remainingMilliseconds)
-                else                 -> "%d ms".format(remainingMilliseconds)
+                else -> "%d ms".format(remainingMilliseconds)
             }
         }
 
@@ -34,11 +34,15 @@ class KSPLog {
         }
 
         fun printRouterTook(count: Int, measureTimeMillis: Long) {
-            logger.warn("Router: ===================> Generate Router file count:$count,took:${formatTime(measureTimeMillis)} <===================\n")
+            if (::logger.isInitialized) {
+                logger.warn("Router: ===================> Generate Router file count:$count,took:${formatTime(measureTimeMillis)} <===================\n")
+            }
         }
 
         fun printInterceptorTook(count: Int, measureTimeMillis: Long) {
-            logger.warn("Interceptor: ===================> Generate Interceptor file count:$count,took:${formatTime(measureTimeMillis)} <===================\n")
+            if (::logger.isInitialized) {
+                logger.warn("Interceptor: ===================> Generate Interceptor file count:$count,took:${formatTime(measureTimeMillis)} <===================\n")
+            }
         }
     }
 }

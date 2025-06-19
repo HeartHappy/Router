@@ -1,13 +1,15 @@
 package com.hearthappy.router.visitor
 
-import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
+import com.hearthappy.router.datahandler.DataInspector
 import com.hearthappy.router.datahandler.convertType
 import com.hearthappy.router.enums.ParamInfo
 import com.hearthappy.router.model.RouterInfo
+import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 
 class RouterVisitor(private val routes: MutableMap<String, RouterInfo>) : KSVisitorVoid() {
@@ -25,7 +27,15 @@ class RouterVisitor(private val routes: MutableMap<String, RouterInfo>) : KSVisi
         val routerInfo = RouterInfo()
         routerInfo.clazz = className
         routerInfo.containingFile = classDeclaration.containingFile
-        routerInfo.supperType = classDeclaration.convertType()
+        routerInfo.routerType = classDeclaration.convertType()
+        classDeclaration.superTypes.forEach { superTypeRef ->
+            val superType = superTypeRef.resolve()
+            val superDeclaration = superType.declaration
+            if (superDeclaration is KSClassDeclaration && superDeclaration.classKind == ClassKind.INTERFACE) {
+                if (DataInspector.isServiceProvider(superDeclaration)) routerInfo.superType = superType.toClassName()
+            }
+        }
+
         classDeclaration.getAllProperties().forEach { property ->
             property.annotations.forEach { annotation ->
                 if (annotation.annotationType.resolve().declaration.qualifiedName?.asString() == Autowired::class.qualifiedName) {

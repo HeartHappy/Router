@@ -14,17 +14,18 @@ import com.hearthappy.router.exception.HandlerException
 import com.hearthappy.router.exception.NoRouteFoundException
 import com.hearthappy.router.ext.reRouterName
 import com.hearthappy.router.service.ClassLoaderService
+import com.hearthappy.router.service.PathReplaceService
 import com.hearthappy.router.service.SerializationService
 
 class ClassLoaderServiceImpl : ClassLoaderService {
 
 
-    override fun <A : Annotation> getAnnotation(target : Class<A>, className : String) : A {
+    override fun <A : Annotation> getAnnotation(target: Class<A>, className: String): A {
         val routerClass = Class.forName(className)
         return routerClass.getAnnotation(target) ?: throw HandlerException("No Annotation found for className ['$className']")
     }
 
-    override fun <A> getAnnotationClass(target : Class<A>, className : String, mailman : Mailman) : Any {
+    override fun <A> getAnnotationClass(target: Class<A>, className: String, mailman: Mailman): Any {
         val routerClass = Class.forName(className)
         val tb = routerClass.getAnnotation(TargetObject::class.java) ?: throw NoRouteFoundException("No instance found for className ['$className']")
         val instance = tb.name.java.newInstance() //TODO Fragment初始化，支持androidx和supper.v4
@@ -36,39 +37,45 @@ class ClassLoaderServiceImpl : ClassLoaderService {
         return instance
     }
 
-    override fun getInstance(className : String) : Any {
+    override fun getInstance(className: String): Any {
         return Class.forName(className).newInstance()
     }
 
 
-    @Suppress("UNCHECKED_CAST") override fun <T> getInstance(instance : Class<T>) : T? {
-        when (instance.javaClass) {
-            SerializationService::class.java.javaClass -> {
-                val serviceProvider = getAnnotation(TargetServiceProvider::class.java, GENERATE_ROUTER_PROVIDER_PKG.plus("Provider$$").plus("Json"))
-                return serviceProvider.clazz.java.newInstance() as T
+    @Suppress("UNCHECKED_CAST") override fun <T> getInstance(instance: Class<T>): T? {
+        try {
+            when (instance) {
+                SerializationService::class.java -> {
+                    val serviceProvider = getAnnotation(TargetServiceProvider::class.java, GENERATE_ROUTER_PROVIDER_PKG.plus("Provider$$").plus("Json"))
+                    return serviceProvider.clazz.java.newInstance() as T
+                }
+                PathReplaceService::class.java -> {
+                    val serviceProvider = getAnnotation(TargetServiceProvider::class.java, GENERATE_ROUTER_PROVIDER_PKG.plus("Provider$$").plus("PathReplace"))
+                    return serviceProvider.clazz.java.newInstance() as T
+                }
+                else -> {}
             }
-            else -> {}
+        } catch (e: ClassNotFoundException) {
+            return null
         }
         return null
     }
 
-    override fun inject(thiz : Any) {
+    override fun inject(thiz: Any) {
         val className = thiz::class.qualifiedName ?: return
         val extras = when (thiz) {
             is Fragment -> thiz.arguments
             is Activity -> thiz.intent.extras
             else -> null
-        }
-        //No parameters are carried
-        if(extras?.isEmpty == true) return
+        } //No parameters are carried
+        if (extras?.isEmpty == true) return
         val routerPkg = GENERATE_ROUTER_ACTIVITY_PKG.plus(className.reRouterName())
         val forName = Class.forName(routerPkg)
         val newInstance = forName.getDeclaredConstructor().newInstance()
 
         val declaredField = forName.getDeclaredField("params")
         declaredField.isAccessible = true
-        val params = (declaredField.get(newInstance) as List<*>).filterIsInstance<ParamInfo>()
-        //The target object needs to inject a parameter list
+        val params = (declaredField.get(newInstance) as List<*>).filterIsInstance<ParamInfo>() //The target object needs to inject a parameter list
         params.forEach { paramInfo ->
             try {
                 val field = thiz::class.java.getDeclaredField(paramInfo.fieldName)
@@ -88,7 +95,7 @@ class ClassLoaderServiceImpl : ClassLoaderService {
                                 val clazz = Class.forName(paramInfo.type)
                                 val serializationService = getInstance(SerializationService::class.java) // 假设您使用了JSON解析库，如Gson或FastJSON
                                 serializationService?.fromJson<Any>(value, clazz).run { field.set(thiz, this) }
-                            } catch (e : Exception) {
+                            } catch (e: Exception) {
                                 Log.e(Router.TAG, "Failed to parse JSON for field: ${paramInfo.fieldName}", e) // 如果解析失败，尝试直接设置原始值
                                 field.set(thiz, value)
                             }
@@ -97,7 +104,7 @@ class ClassLoaderServiceImpl : ClassLoaderService {
                         }
                     }
                 }
-            } catch (e : Exception) {
+            } catch (e: Exception) {
                 Log.e(Router.TAG, "Failed to inject field: ${paramInfo.fieldName}", e)
             }
         }

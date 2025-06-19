@@ -6,8 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.util.SparseArray
+import androidx.core.app.ActivityOptionsCompat
 import com.hearthappy.router.analysis.TargetObject
 import com.hearthappy.router.enums.RouteType
 import com.hearthappy.router.exception.HandlerException
@@ -15,9 +15,12 @@ import com.hearthappy.router.exception.NoRouteFoundException
 import com.hearthappy.router.ext.rePathName
 import com.hearthappy.router.ext.toSmartBundle
 import com.hearthappy.router.interfaces.IDirector
+import com.hearthappy.router.interfaces.ILogger
 import com.hearthappy.router.interfaces.InterceptorCallback
+import com.hearthappy.router.logger.DefaultLogger
 import com.hearthappy.router.service.ClassLoaderService
 import com.hearthappy.router.service.InterceptorService
+import com.hearthappy.router.service.PathReplaceService
 import com.hearthappy.router.service.SerializationService
 import com.hearthappy.router.service.impl.ClassLoaderServiceImpl
 import com.hearthappy.router.service.impl.InterceptorServiceImpl
@@ -43,6 +46,7 @@ class Mailman : IDirector {
     private val bundle by lazy { Bundle() }
     private var appContext: Context? = null
     private var context: Context? = null
+    private var optionsCompat: Bundle? = null
 
     private val classLoaderService: ClassLoaderService by lazy { ClassLoaderServiceImpl() }
     private val interceptorService: InterceptorService by lazy { InterceptorServiceImpl() }
@@ -63,8 +67,15 @@ class Mailman : IDirector {
         classLoaderService.inject(thiz)
     }
 
+    fun showLog(isShowLog: Boolean) {
+        logger.showLog(isShowLog)
+    }
 
-    private fun withContext(context: Context): Mailman {
+    fun setLogger(log: ILogger) {
+        logger = log
+    }
+
+    private fun setContext(context: Context): Mailman {
         this.context = context
         return this
     }
@@ -81,6 +92,10 @@ class Mailman : IDirector {
         return bundle
     }
 
+    fun getOptionsCompat(): Bundle? {
+        return optionsCompat
+    }
+
 
     private fun build(path: String?, uri: Uri?): IDirector {
         path ?: throw HandlerException("Parameter cannot be empty!")
@@ -91,12 +106,14 @@ class Mailman : IDirector {
     }
 
     fun build(path: String): IDirector {
-        build(path, null)
+        val pathReplaceService = Router.getInstance(PathReplaceService::class.java)
+        pathReplaceService?.let { build(pathReplaceService.forString(path), null) } ?: build(path, null)
         return this
     }
 
     fun build(uri: Uri): IDirector {
-        build(uri.path, uri)
+        val pathReplaceService = Router.getInstance(PathReplaceService::class.java)
+        pathReplaceService?.let { build(uri.path, pathReplaceService.forUri(uri)) } ?: build(uri.path, uri)
         return this
     }
 
@@ -111,8 +128,12 @@ class Mailman : IDirector {
     }
 
     override fun withObject(key: String, value: Any): IDirector {
-        serializationService = Router.getInstance(SerializationService::class.java)
-        serializationService?.let { bundle.putString(key, it.toJson(value)) } ?: throw HandlerException("SerializationService is null")
+        serializationService?.let {
+            bundle.putString(key, it.toJson(value))
+        } ?: run {
+            serializationService = Router.getInstance(SerializationService::class.java)
+            serializationService?.let { bundle.putString(key, it.toJson(value)) } ?: throw HandlerException("The SerializationService interface has no implementation class")
+        }
         return this
     }
 
@@ -237,6 +258,11 @@ class Mailman : IDirector {
         return this
     }
 
+    override fun withOptionsCompat(compat: ActivityOptionsCompat): IDirector {
+        optionsCompat = compat.toBundle()
+        return this
+    }
+
     override fun withBundle(key: String, bundle: Bundle): IDirector {
         this.bundle.putBundle(key, bundle)
         return this
@@ -268,7 +294,7 @@ class Mailman : IDirector {
 
                 override fun onInterrupt(exception: Throwable?) {
                     exception?.let {
-                        if (BuildConfig.DEBUG) Log.e(Router.TAG, "onInterrupt: ${exception.message}")
+                        logger.debug("onInterrupt: ${exception.message}")
                         shouldContinue.set(false)
                     }
                 }
@@ -279,12 +305,10 @@ class Mailman : IDirector {
 
 
     private fun navigationForward(context: Context?) {
-
         try {
-
             val to = classLoaderService.getAnnotation(TargetObject::class.java, GENERATE_ROUTER_PATH_PKG.plus(path.rePathName()))
             val currentContext = context ?: appContext ?: throw HandlerException("context is null")
-            withContext(currentContext)
+            setContext(currentContext)
             when (to.routeType) {
                 RouteType.ACTIVITY -> {
                     val intent = if (this.uri == null) Intent(currentContext, to.name.java) else Intent(Intent.ACTION_VIEW, this@Mailman.uri).apply { uri?.toSmartBundle(bundle) }
@@ -294,7 +318,7 @@ class Mailman : IDirector {
                         if (currentContext !is Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         if (this@Mailman.action.isNotEmpty()) action = this@Mailman.action
                     }
-                    currentContext.startActivity(intent)
+                    currentContext.startActivity(intent, getOptionsCompat())
                     when (currentContext) {
                         is Activity -> {
                             if ((-1 != enterAnim && -1 != exitAnim)) {
@@ -355,10 +379,14 @@ class Mailman : IDirector {
         bundle.clear()
         context = null
         uri = null
+        optionsCompat?.clear()
+        optionsCompat = null
     }
 
 
     companion object {
+        internal var logger: ILogger = DefaultLogger()
+
         //生成路径
         internal const val GENERATE_ROUTER_PATH_PKG = "com.hearthappy.router.generate.path."
         internal const val GENERATE_ROUTER_ACTIVITY_PKG = "com.hearthappy.router.generate.routes."

@@ -35,7 +35,11 @@ android {
         viewBinding true
     }
 }
-
+ksp {
+    // Router 生成日志开关参数（true=开启日志，false=关闭）
+    arg("enableRouterLog", "true")  // 调试时开启
+    // arg("routerLog", "false")  // 发布时关闭
+}
 dependencies {
 
     implementation libs.androidx.core.ktx

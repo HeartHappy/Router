@@ -11,6 +11,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+enableFeaturePreview('VERSION_CATALOGS')
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -18,7 +19,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-enableFeaturePreview('VERSION_CATALOGS')
+
 rootProject.name = "Router"
 include ':app'
 include ':compiler'
@@ -26,3 +27,4 @@ include ':annotations'
 include ':core'
 include ':mylibrary'
 include ':mylibrary2'
+include ':common-api'

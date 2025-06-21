@@ -55,7 +55,7 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
             poetFactory.apply {
                 KSPLog.print("path = $path , class = ${info.clazz},supper:${info.routerType}")
                 when (info.routerType) {
-                    Constant.ROUTER_TYPE_ACTIVITY, Constant.ROUTER_TYPE_FRAGMENT -> {
+                    Constant.ROUTER_TYPE_ACTIVITY, Constant.ROUTER_TYPE_FRAGMENT,Constant.ROUTER_TYPE_SERVICE -> {
                         generatePath(path, info)
                         generateRouter(info)
                     }

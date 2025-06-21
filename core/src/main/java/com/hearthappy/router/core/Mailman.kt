@@ -1,9 +1,11 @@
 package com.hearthappy.router.core
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray
@@ -333,7 +335,17 @@ class Mailman : IDirector {
                 }
 
                 RouteType.SERVICE -> {
-                    TODO()
+                    val intent = Intent(currentContext, to.name.java)
+                    intent.apply {
+                        putExtras(bundle)
+                        if (0 != this@Mailman.flags) setFlags(this@Mailman.flags)
+                        if (this@Mailman.action.isNotEmpty()) action = this@Mailman.action
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        currentContext.startForegroundService(intent);
+                    } else {
+                        currentContext.startService(intent);
+                    }
                 }
 
                 RouteType.BROADCAST -> {

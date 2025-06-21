@@ -36,9 +36,7 @@ android {
     }
 }
 ksp {
-    // Router 生成日志开关参数（true=开启日志，false=关闭）
     arg("enableRouterLog", "true")  // 调试时开启
-    // arg("routerLog", "false")  // 发布时关闭
 }
 dependencies {
 
@@ -48,6 +46,7 @@ dependencies {
     implementation libs.androidx.activity
     implementation libs.androidx.constraintlayout
     implementation libs.android.basic.ktx
+    implementation project(':common-api')
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core
@@ -58,7 +57,6 @@ dependencies {
     implementation project(':mylibrary')
     implementation project(':mylibrary2')
     //router
-    implementation project(':annotations')
     implementation project(':core')
     ksp project(':compiler')
 }

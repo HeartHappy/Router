@@ -1,8 +1,8 @@
-package com.hearthappy.mylibrary
+package com.hearthappy.mylibrary2
 
 import android.os.Bundle
 import com.hearthappy.basic.AbsBaseFragment
-import com.hearthappy.mylibrary.databinding.FragmentRouterBinding
+import com.hearthappy.mylibrary2.databinding.FragmentRouterBinding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
 import com.hearthappy.router.core.Router

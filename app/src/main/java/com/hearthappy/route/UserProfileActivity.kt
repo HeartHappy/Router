@@ -1,6 +1,5 @@
 package com.hearthappy.route
 
-import androidx.fragment.app.Fragment
 import com.hearthappy.route.base.BaseActivity
 import com.hearthappy.route.databinding.ActivityUserProfileBinding
 import com.hearthappy.route.interceptor.ActivityInterceptor
@@ -41,12 +40,7 @@ class UserProfileActivity : BaseActivity<ActivityUserProfileBinding>() {
             ActivityInterceptor.interceptorSwitch = true
             Router.build(RouterPath.MODEL_UI).withString("name", "From the UserProfileActivity in the app").navigation()
         }
-        btnJump3.setOnClickListener {
-            val fragment =  Router.build(RouterPath.MODEL_FRAGMENT).withString("username","KSP Router").getInstance() as Fragment
-            val beginTransaction = supportFragmentManager.beginTransaction()
-            beginTransaction.add(R.id.fragmentLayout, fragment)
-            beginTransaction.commit()
-        }
+
     }
 
     override fun ActivityUserProfileBinding.initData() {

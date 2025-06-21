@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
+import androidx.fragment.app.Fragment
 import com.hearthappy.mylibrary.databinding.ActivityRouterBinding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
@@ -33,6 +34,16 @@ import com.hearthappy.router.core.Router
             btnJump.setOnClickListener {
                 val optionsCompat = ActivityOptionsCompat.makeClipRevealAnimation(root, root.width / 2, root.height / 2, root.width, root.height)
                 Router.build("/model2/ui").withString("name", "KSP Router!").withInt("age", 18).withOptionsCompat(optionsCompat).navigation()
+            }
+
+            btnJump3.setOnClickListener {
+                val fragment = Router.build("/model/fragment").withString("username", "KSP Router").getInstance() as Fragment
+                val beginTransaction = supportFragmentManager.beginTransaction()
+                beginTransaction.add(R.id.fragmentLayout, fragment)
+                beginTransaction.commit()
+            }
+            btnJump4.setOnClickListener {
+                Router.build("/service/test").navigation()
             }
         }
     }

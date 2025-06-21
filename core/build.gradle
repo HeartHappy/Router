@@ -37,5 +37,5 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.material
     implementation(libs.androidx.startup.runtime)
-    implementation project(':annotations')
+    api project(':annotations')
 }

@@ -78,7 +78,7 @@ class DefaultLogger : ILogger {
         }
     }
 
-    override fun error(tag: String?, message: String?, e: Throwable?) {
+    override fun error(tag: String?, message: String?, throwable: Throwable?) {
         if (BuildConfig.DEBUG && isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.e(if (TextUtils.isEmpty(tag)) defaultTag else tag, message + getExtInfo(stackTraceElement))
@@ -98,8 +98,9 @@ class DefaultLogger : ILogger {
 
     private fun getExtInfo(stackTraceElement: StackTraceElement): String {
         val separator = " & "
-        val sb = StringBuilder("[")
+
         if (isShowStackTrace) {
+            val sb = StringBuilder("[")
             val threadName = Thread.currentThread().name
             val fileName = stackTraceElement.fileName
             val className = stackTraceElement.className
@@ -113,9 +114,10 @@ class DefaultLogger : ILogger {
             sb.append("ClassName=").append(className).append(separator)
             sb.append("MethodName=").append(methodName).append(separator)
             sb.append("LineNumber=").append(lineNumber)
+            sb.append(" ] ")
+            return sb.toString()
         }
-        sb.append(" ] ")
-        return sb.toString()
+        return ""
     }
 
 }

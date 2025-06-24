@@ -28,21 +28,19 @@ class KSPLog {
         }
 
         fun print(msg: String) {
-            if (::logger.isInitialized) {
-                logger.warn("Router: =====> $msg")
-            }
+            isInit { logger.warn("Router: =====> $msg") }
         }
 
         fun printRouterTook(count: Int, measureTimeMillis: Long) {
-            if (::logger.isInitialized) {
-                logger.warn("Router: ===================> Generate Router file count:$count,took:${formatTime(measureTimeMillis)} <===================\n")
-            }
+            isInit { logger.warn("Router: ===================> Generate Router file count:$count,took:${formatTime(measureTimeMillis)} <===================\n") }
         }
 
         fun printInterceptorTook(count: Int, measureTimeMillis: Long) {
-            if (::logger.isInitialized) {
-                logger.warn("Interceptor: ===================> Generate Interceptor file count:$count,took:${formatTime(measureTimeMillis)} <===================\n")
-            }
+            isInit { logger.warn("Interceptor: ===================> Generate Interceptor file count:$count,took:${formatTime(measureTimeMillis)} <===================\n") }
+        }
+
+        private fun isInit(block: () -> Unit) {
+            if (::logger.isInitialized) block()
         }
     }
 }

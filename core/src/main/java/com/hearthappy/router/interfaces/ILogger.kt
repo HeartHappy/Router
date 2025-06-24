@@ -27,7 +27,7 @@ interface ILogger {
 
     fun error(tag: String?, message: String?)
 
-    fun error(tag: String?, message: String?, e: Throwable?)
+    fun error(tag: String?, message: String?, throwable: Throwable?)
 
     fun monitor(message: String?)
 

@@ -57,6 +57,16 @@
         android:id="@+id/btnJump4"
         android:layout_width="match_parent"
         android:textAllCaps="false"
+        android:text="Start Service"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/btnJump5"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnJump5"
+        android:layout_width="match_parent"
+        android:textAllCaps="false"
         android:text="Loader model Service"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

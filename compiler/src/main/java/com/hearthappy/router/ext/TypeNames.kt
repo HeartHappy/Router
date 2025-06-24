@@ -17,7 +17,7 @@ object AndroidTypeNames {
 
 object RouterTypeNames {
     internal val Router = ClassName("com.hearthappy.router.core.Router", "Router")
-    internal val RouterParamInfo = ClassName("com.hearthappy.router.enums", "ParamInfo")
+    internal val RouterParamInfo = ClassName("com.hearthappy.router.enums", "InjectParams")
     internal val TargetActivity=ClassName("com.hearthappy.router.annotations", "TargetActivity")
     internal val AppCompatActivity=ClassName("androidx.appcompat.app",  "AppCompatActivity")
     internal val Activity=ClassName("android.app", "Activity")
@@ -28,6 +28,7 @@ object RouterTypeNames {
     internal val Interceptor = ClassName(" com.hearthappy.router.generate.interceptor", "Interceptor$$".plus("Group"))
     internal val SerializationService=ClassName("com.hearthappy.router.service", "SerializationService")
     internal val PathReplaceService=ClassName("com.hearthappy.router.service", "PathReplaceService")
+    internal val ProviderService=ClassName("com.hearthappy.router.service", "ProviderService")
 }
 
 object CollectionsTypeNames{

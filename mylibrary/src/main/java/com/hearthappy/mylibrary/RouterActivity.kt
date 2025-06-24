@@ -2,9 +2,13 @@ package com.hearthappy.mylibrary
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
+import com.hearthappy.common_api.HelloService
 import com.hearthappy.mylibrary.databinding.ActivityRouterBinding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
@@ -44,6 +48,14 @@ import com.hearthappy.router.core.Router
             }
             btnJump4.setOnClickListener {
                 Router.build("/service/test").navigation()
+            }
+            btnJump5.setOnClickListener {
+                val instance = Router.build("/service/hello").getInstance() as HelloService
+                val instance1 = Router.getInstance(HelloService::class.java)
+                instance.sayHello("interface service from /service/hello")
+                instance.sayHello("interface service from HelloService")
+                Router.build("/model2/ui").withString("name", "KSP Router!").withInt("age", 18).navigation()
+
             }
         }
     }

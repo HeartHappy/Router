@@ -1,6 +1,9 @@
 package com.hearthappy.common_api
 
-interface HelloService {
+import com.hearthappy.router.service.ProviderService
+
+
+interface HelloService: ProviderService {
 
     fun sayHello(name: String): String
 }

@@ -24,7 +24,7 @@ object Router {
         _mailman.appInit(context)
     }
 
-    internal fun <T> getInstance(instance: Class<T>): T? {
+    fun <T> getInstance(instance: Class<T>): T? {
         return _mailman.getInstance(instance)
     }
 

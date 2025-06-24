@@ -3,6 +3,7 @@ package com.hearthappy.mylibrary2
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.hearthappy.common_api.HelloService
 import com.hearthappy.mylibrary2.databinding.ActivityRouter2Binding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
@@ -18,6 +19,9 @@ import java.util.Locale
     @Autowired var name = ""
 
     @Autowired var age: Int = 0
+
+    @Autowired
+    var helloService:HelloService? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityRouter2Binding.inflate(layoutInflater)
@@ -26,7 +30,7 @@ import java.util.Locale
         val uri = intent.data
         uri?.let { Toast.makeText(this, "uri:$it", Toast.LENGTH_LONG).show() }
         viewBinding.apply {
-            if (name.isNotEmpty()) tvTitle.text = String.format(Locale.CHINA, "name: %s,age: %d", name, age)
+            if (name.isNotEmpty()) tvTitle.text = String.format(Locale.CHINA, "name: %s,age: %d", name, age).plus(helloService?.sayHello("KSP Router"))
             btnJump.setOnClickListener {
                 Router.build("/launcher/main").withString("name", "From the Router2Activity in the module").navigation()
             }

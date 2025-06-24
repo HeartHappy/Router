@@ -32,7 +32,9 @@ android {
         viewBinding true
     }
 }
-
+ksp {
+    arg("enableRouterLog", "true")  // 调试时开启
+}
 dependencies {
 
     implementation libs.androidx.core.ktx

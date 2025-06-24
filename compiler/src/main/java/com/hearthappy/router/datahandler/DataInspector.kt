@@ -3,6 +3,7 @@ package com.hearthappy.router.datahandler
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.hearthappy.router.ext.RouterTypeNames
 import com.hearthappy.router.ext.RouterTypeNames.Activity
 import com.hearthappy.router.ext.RouterTypeNames.BroadcastReceiver
 import com.hearthappy.router.ext.RouterTypeNames.Fragment
@@ -33,7 +34,7 @@ object DataInspector {
     }
 
     fun isServiceProvider(supperClass: KSClassDeclaration):Boolean{
-        return  TypeComparator.isSameType(supperClass, SerializationService) || TypeComparator.isSameType(supperClass, PathReplaceService)
+        return  TypeComparator.isSameType(supperClass, SerializationService) || TypeComparator.isSameType(supperClass, PathReplaceService) || TypeComparator.isSameType(supperClass, RouterTypeNames.ProviderService)
     }
     fun isParameter(paramName: String?, paramType: String) = !(paramName == "other" || paramType == "Any")
 

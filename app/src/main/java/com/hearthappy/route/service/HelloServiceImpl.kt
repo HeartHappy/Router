@@ -6,6 +6,7 @@ import com.hearthappy.router.annotations.Route
 @Route("/service/hello")
 class HelloServiceImpl:HelloService {
     override fun sayHello(name: String): String {
+
         return "Hello $name"
     }
 }

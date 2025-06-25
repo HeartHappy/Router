@@ -1,7 +1,7 @@
 package com.hearthappy.router.service.impl
 
 import com.hearthappy.router.analysis.TargetInterceptor
-import com.hearthappy.router.core.Mailman.Companion.GENERATE_ROUTER_INTERCEPTOR_PKG
+import com.hearthappy.router.core.Courier.Companion.GENERATE_ROUTER_INTERCEPTOR_PKG
 import com.hearthappy.router.interfaces.IInterceptor
 import com.hearthappy.router.service.ClassLoaderService
 import com.hearthappy.router.service.InterceptorService

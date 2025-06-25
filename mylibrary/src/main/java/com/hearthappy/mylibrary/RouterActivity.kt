@@ -1,25 +1,35 @@
 package com.hearthappy.mylibrary
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
 import com.hearthappy.common_api.HelloService
 import com.hearthappy.mylibrary.databinding.ActivityRouterBinding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
+import com.hearthappy.router.core.Courier
 import com.hearthappy.router.core.Router
+import com.hearthappy.router.interfaces.NavigationCallback
 
 
 @Route("/model/ui") class RouterActivity : AppCompatActivity() {
 
 
     private lateinit var viewBinding: ActivityRouterBinding
-
+    private val activityResultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            result.data?.let {
+                val resultData = it.getStringExtra("result")
+                viewBinding.tvTitle.text = "返回结果: ".plus(resultData)
+            }
+        }
+    };
     @Autowired var name: String = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,12 +61,51 @@ import com.hearthappy.router.core.Router
             }
             btnJump5.setOnClickListener {
                 val instance = Router.build("/service/hello").getInstance() as HelloService
-                val instance1 = Router.getInstance(HelloService::class.java)
+//                val instance1 = Router.getInstance(HelloService::class.java)
                 instance.sayHello("interface service from /service/hello")
                 instance.sayHello("interface service from HelloService")
-                Router.build("/model2/ui").withString("name", "KSP Router!").withInt("age", 18).navigation()
+                Router.build("/model2/ui").withString("name", "KSP Router!").navigation()
+                Router.build("").getDestination()
+            }
+            btnJump6.setOnClickListener {
+                Router.build("/model2/ui").navigation(this@RouterActivity,100,object : NavigationCallback {
+                    override fun onFound(courier: Courier) {
+                        Log.d(TAG, "onFound: ${courier.getPath()}")
+                    }
 
+                    override fun onLost(courier: Courier) {
+                        Log.d(TAG, "onLost: ${courier.getPath()}")
+                    }
+
+                    override fun onArrival(courier: Courier) {
+                        Log.d(TAG, "onArrival: ${courier.getPath()}")
+                    }
+
+                    override fun onInterrupt(courier: Courier) {
+                        Log.d(TAG, "onInterrupt: ${courier.getPath()}")
+                    }
+                })
+            }
+            btnJump7.setOnClickListener { // TODO: launch启动
+//                Router.build("/model2/ui").destination
+//                Router.build("").getIntent()
+//                activityResultLauncher.launch( Intent(this,Router2Activity::class.java))
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int,  data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 100) {
+            if (resultCode == RESULT_OK && data != null) {
+                val result = data.getStringExtra("result")
+                viewBinding.tvTitle.text = "返回结果: ".plus(result)
+            } else {
+                viewBinding.tvTitle.text = "操作取消或无返回结果"
+            }
+        }
+    }
+    companion object{
+        private const val TAG = "RouterActivity"
     }
 }

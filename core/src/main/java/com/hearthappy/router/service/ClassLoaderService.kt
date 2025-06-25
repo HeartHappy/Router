@@ -1,6 +1,6 @@
 package com.hearthappy.router.service
 
-import com.hearthappy.router.core.Mailman
+import com.hearthappy.router.core.Courier
 
 /**
  * Created Date: 2025/6/14
@@ -12,7 +12,7 @@ interface ClassLoaderService {
 
     fun <A : Annotation> getAnnotation(target : Class<A>, className : String) : A
 
-    fun <A> getAnnotationClass(target : Class<A>, className : String, mailman : Mailman) : Any
+    fun <A> getAnnotationClass(target : Class<A>, className : String, courier : Courier) : Any
 
     fun getInstance(className : String) : Any
 

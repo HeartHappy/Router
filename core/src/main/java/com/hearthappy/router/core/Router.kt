@@ -2,7 +2,7 @@ package com.hearthappy.router.core
 
 import android.content.Context
 import android.net.Uri
-import com.hearthappy.router.interfaces.IDirector
+import com.hearthappy.router.interfaces.CourierManager
 import com.hearthappy.router.interfaces.ILogger
 
 /**
@@ -14,39 +14,39 @@ object Router {
     internal const val TAG = "Router"
 
 
-    private val _mailman: Mailman by lazy { Mailman() }
+    private val _courier: Courier by lazy { Courier() }
 
 
     /**
      * initialize routing related services
      */
     internal fun init(context: Context) {
-        _mailman.appInit(context)
+        _courier.appInit(context)
     }
 
     fun <T> getInstance(instance: Class<T>): T? {
-        return _mailman.getInstance(instance)
+        return _courier.getInstance(instance)
     }
 
     fun openLog() {
-        _mailman.showLog(true)
+        _courier.showLog(true)
     }
 
     fun setLogger(logger:ILogger){
-        _mailman.setLogger(logger)
+        _courier.setLogger(logger)
     }
 
-    fun build(path: String): IDirector {
-        return _mailman.build(path)
+    fun build(path: String): CourierManager {
+        return _courier.build(path)
     }
 
-    fun build(uri: Uri): IDirector {
-        return _mailman.build(uri)
+    fun build(uri: Uri): CourierManager {
+        return _courier.build(uri)
     }
 
     // 参数注入
     fun inject(thiz: Any) {
-        _mailman.inject(thiz)
+        _courier.inject(thiz)
     }
 
 

@@ -3,7 +3,7 @@ package com.hearthappy.router.ext
 import android.net.Uri
 import android.os.Bundle
 
-fun String.rePathName(): String {
+fun String.renaming(): String {
     val replaceFirstChar = this.split("/").joinToString("") { it.replaceFirstChar { rfc -> rfc.uppercaseChar() } }.replaceFirstChar { it.uppercase() }
     return "Path$$".plus(replaceFirstChar)
 }

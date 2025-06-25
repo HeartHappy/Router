@@ -1,8 +1,8 @@
 package com.hearthappy.router.interfaces
 
-import com.hearthappy.router.core.Mailman
+import com.hearthappy.router.core.Courier
 
 interface IInterceptor {
 
-    fun intercept(mailman: Mailman, callback: InterceptorCallback)
+    fun intercept(courier: Courier, callback: InterceptorCallback)
 }

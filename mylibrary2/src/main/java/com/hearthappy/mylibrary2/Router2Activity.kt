@@ -1,5 +1,6 @@
 package com.hearthappy.mylibrary2
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +34,13 @@ import java.util.Locale
             if (name.isNotEmpty()) tvTitle.text = String.format(Locale.CHINA, "name: %s,age: %d", name, age).plus(helloService?.sayHello("KSP Router"))
             btnJump.setOnClickListener {
                 Router.build("/launcher/main").withString("name", "From the Router2Activity in the module").navigation()
+            }
+            btnJump1.setOnClickListener {
+                val result: String = tvTitle.text.toString()
+                val resultIntent = Intent()
+                resultIntent.putExtra("result", result)
+                setResult(RESULT_OK, resultIntent)
+                finish()
             }
         }
     }

@@ -2,7 +2,7 @@ package com.hearthappy.route.interceptor
 
 import android.util.Log
 import com.hearthappy.router.annotations.Interceptor
-import com.hearthappy.router.core.Sorter
+import com.hearthappy.router.launcher.Sorter
 import com.hearthappy.router.interfaces.IInterceptor
 import com.hearthappy.router.interfaces.InterceptorCallback
 

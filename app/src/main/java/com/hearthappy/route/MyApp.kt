@@ -1,7 +1,7 @@
 package com.hearthappy.route
 
 import android.app.Application
-import com.hearthappy.router.core.Router
+import com.hearthappy.router.launcher.Router
 
 class MyApp:Application() {
     override fun onCreate() {

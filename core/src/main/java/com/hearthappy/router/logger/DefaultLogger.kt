@@ -3,8 +3,8 @@ package com.hearthappy.router.logger
 import android.text.TextUtils
 import android.util.Log
 import com.hearthappy.router.core.BuildConfig
-import com.hearthappy.router.core.Router
-import com.hearthappy.router.interfaces.ILogger
+import com.hearthappy.router.launcher.Router
+import com.hearthappy.router.core.ILogger
 
 class DefaultLogger : ILogger {
     private var isShowLog: Boolean = false

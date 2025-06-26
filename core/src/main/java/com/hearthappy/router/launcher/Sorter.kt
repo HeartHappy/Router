@@ -1,4 +1,4 @@
-package com.hearthappy.router.core
+package com.hearthappy.router.launcher
 
 import android.app.Activity
 import android.content.Context
@@ -9,12 +9,14 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.hearthappy.router.analysis.TargetObject
+import com.hearthappy.router.core.BuildConfig
+import com.hearthappy.router.core.Pack
 import com.hearthappy.router.enums.RouteType
 import com.hearthappy.router.exception.HandlerException
 import com.hearthappy.router.ext.renaming
 import com.hearthappy.router.ext.toSmartBundle
-import com.hearthappy.router.interfaces.ICourier
-import com.hearthappy.router.interfaces.ILogger
+import com.hearthappy.router.core.ICourier
+import com.hearthappy.router.core.ILogger
 import com.hearthappy.router.interfaces.InterceptorCallback
 import com.hearthappy.router.interfaces.NavigationCallback
 import com.hearthappy.router.logger.DefaultLogger

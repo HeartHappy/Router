@@ -1,5 +1,7 @@
 package com.hearthappy.router.interfaces
 
+import com.hearthappy.router.core.ICourier
+
 /**
  * Created Date: 2025/6/10
  * @author ChenRui

@@ -1,7 +1,7 @@
 package com.hearthappy.router.initializer
 
 import android.content.Context
-import com.hearthappy.router.core.Router
+import com.hearthappy.router.launcher.Router
 
 class ServiceInitializer(context: Context) {
     init {

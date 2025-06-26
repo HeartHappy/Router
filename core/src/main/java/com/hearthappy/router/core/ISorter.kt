@@ -1,7 +1,7 @@
-package com.hearthappy.router.interfaces
+package com.hearthappy.router.core
 
 import android.content.Context
-import android.content.Intent
+import com.hearthappy.router.interfaces.NavigationCallback
 
 /**
  * Created Date: 2025/6/25

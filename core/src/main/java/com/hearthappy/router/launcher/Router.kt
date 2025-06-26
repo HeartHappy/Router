@@ -1,9 +1,9 @@
-package com.hearthappy.router.core
+package com.hearthappy.router.launcher
 
 import android.content.Context
 import android.net.Uri
-import com.hearthappy.router.interfaces.ICourier
-import com.hearthappy.router.interfaces.ILogger
+import com.hearthappy.router.core.ICourier
+import com.hearthappy.router.core.ILogger
 
 /**
  * Created Date: 2025/6/10
@@ -32,7 +32,7 @@ object Router {
         _courier.showLog(true)
     }
 
-    fun setLogger(logger:ILogger){
+    fun setLogger(logger: ILogger){
         _courier.setLogger(logger)
     }
 

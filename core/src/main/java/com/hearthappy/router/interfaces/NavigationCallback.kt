@@ -1,6 +1,6 @@
 package com.hearthappy.router.interfaces
 
-import com.hearthappy.router.core.Sorter
+import com.hearthappy.router.launcher.Sorter
 
 /**
  * Created Date: 2025/6/25

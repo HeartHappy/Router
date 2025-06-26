@@ -1,4 +1,4 @@
-package com.hearthappy.router.interfaces
+package com.hearthappy.router.core
 
 import android.os.Bundle
 import android.os.Parcelable

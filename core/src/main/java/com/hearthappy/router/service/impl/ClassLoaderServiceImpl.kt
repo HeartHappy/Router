@@ -6,15 +6,15 @@ import android.util.SparseArray
 import androidx.fragment.app.Fragment
 import com.hearthappy.router.analysis.TargetObject
 import com.hearthappy.router.analysis.TargetServiceProvider
-import com.hearthappy.router.core.Router
-import com.hearthappy.router.core.Sorter
-import com.hearthappy.router.core.Sorter.Companion.GENERATE_ROUTER_ACTIVITY_PKG
-import com.hearthappy.router.core.Sorter.Companion.GENERATE_ROUTER_PROVIDER_PKG
-import com.hearthappy.router.core.Sorter.Companion.logger
+import com.hearthappy.router.launcher.Router
+import com.hearthappy.router.launcher.Sorter
+import com.hearthappy.router.launcher.Sorter.Companion.GENERATE_ROUTER_ACTIVITY_PKG
+import com.hearthappy.router.launcher.Sorter.Companion.GENERATE_ROUTER_PROVIDER_PKG
+import com.hearthappy.router.launcher.Sorter.Companion.logger
 import com.hearthappy.router.enums.InjectParams
 import com.hearthappy.router.exception.HandlerException
 import com.hearthappy.router.exception.NoRouteFoundException
-import com.hearthappy.router.ext.reRouterName
+import com.hearthappy.router.ext.routeRenaming
 import com.hearthappy.router.service.ClassLoaderService
 import com.hearthappy.router.service.PathReplaceService
 import com.hearthappy.router.service.ProviderService
@@ -70,7 +70,7 @@ class ClassLoaderServiceImpl : ClassLoaderService {
     override fun inject(thiz: Any) {
         val className = thiz::class.qualifiedName ?: return
       //No parameters are carried //        if (extras?.isEmpty == true) return
-        val routerPkg = GENERATE_ROUTER_ACTIVITY_PKG.plus(className.reRouterName())
+        val routerPkg = GENERATE_ROUTER_ACTIVITY_PKG.plus(className.routeRenaming())
         val forName = Class.forName(routerPkg)
         val newInstance = forName.getDeclaredConstructor().newInstance()
 

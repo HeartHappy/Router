@@ -13,8 +13,8 @@ import com.hearthappy.common_api.HelloService
 import com.hearthappy.mylibrary.databinding.ActivityRouterBinding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
-import com.hearthappy.router.core.Router
-import com.hearthappy.router.core.Sorter
+import com.hearthappy.router.launcher.Router
+import com.hearthappy.router.launcher.Sorter
 import com.hearthappy.router.interfaces.NavigationCallback
 
 

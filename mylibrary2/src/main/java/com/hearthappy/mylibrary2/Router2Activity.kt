@@ -8,7 +8,7 @@ import com.hearthappy.common_api.HelloService
 import com.hearthappy.mylibrary2.databinding.ActivityRouter2Binding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
-import com.hearthappy.router.core.Router
+import com.hearthappy.router.launcher.Router
 import java.util.Locale
 
 

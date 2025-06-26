@@ -6,7 +6,7 @@ import com.hearthappy.route.interceptor.ActivityInterceptor
 import com.hearthappy.route.model.UserBean
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
-import com.hearthappy.router.core.Router
+import com.hearthappy.router.launcher.Router
 
 @Route(path = RouterPath.USER_PROFILE_ACTIVITY)
 class UserProfileActivity : BaseActivity<ActivityUserProfileBinding>() {

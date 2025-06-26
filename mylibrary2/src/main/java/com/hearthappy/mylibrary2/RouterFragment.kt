@@ -5,7 +5,7 @@ import com.hearthappy.basic.AbsBaseFragment
 import com.hearthappy.mylibrary2.databinding.FragmentRouterBinding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
-import com.hearthappy.router.core.Router
+import com.hearthappy.router.launcher.Router
 
 @Route("/model/fragment") class RouterFragment : AbsBaseFragment<FragmentRouterBinding>() {
 

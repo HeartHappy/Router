@@ -3,19 +3,29 @@ package com.hearthappy.router.ext
 import android.net.Uri
 import android.os.Bundle
 
+/**
+ * path rename
+ * @receiver String
+ * @return String
+ */
 fun String.renaming(): String {
     val replaceFirstChar = this.split("/").joinToString("") { it.replaceFirstChar { rfc -> rfc.uppercaseChar() } }.replaceFirstChar { it.uppercase() }
     return "Path$$".plus(replaceFirstChar)
 }
 
-fun String.reRouterName(): String {
+/**
+ *  route rename
+ * @receiver String
+ * @return String
+ */
+fun String.routeRenaming(): String {
     return "Router$$${this.substringAfterLast(".")}"
 }
 
 /**
- * 将 Uri 中的查询参数智能转换为 Bundle（自动推断类型）
- * @receiver Uri 需要解析的 Uri 对象
- * @param bundle Bundle 包含多种类型参数的 Bundle
+ * Intelligently convert query parameters in Uri to Bundle (automatically infer type)
+ * @receiver Uri The Uri object to be parsed
+ * @param bundle Bundle A Bundle containing multiple types of parameters
  */
 fun Uri.toSmartBundle(bundle: Bundle) {
     val queryKeys = this.queryParameterNames // 获取所有参数名

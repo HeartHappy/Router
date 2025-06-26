@@ -1,4 +1,4 @@
-package com.hearthappy.router.interfaces
+package com.hearthappy.router.core
 
 /**
  * Created Date: 2025/6/19

@@ -2,7 +2,7 @@ package com.hearthappy.router.core
 
 import android.content.Context
 import android.net.Uri
-import com.hearthappy.router.interfaces.CourierManager
+import com.hearthappy.router.interfaces.ICourier
 import com.hearthappy.router.interfaces.ILogger
 
 /**
@@ -14,7 +14,7 @@ object Router {
     internal const val TAG = "Router"
 
 
-    private val _courier: Courier by lazy { Courier() }
+    private val _courier by lazy { Courier() }
 
 
     /**
@@ -36,11 +36,11 @@ object Router {
         _courier.setLogger(logger)
     }
 
-    fun build(path: String): CourierManager {
+    fun build(path: String): ICourier {
         return _courier.build(path)
     }
 
-    fun build(uri: Uri): CourierManager {
+    fun build(uri: Uri): ICourier {
         return _courier.build(uri)
     }
 

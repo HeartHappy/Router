@@ -6,11 +6,11 @@ import android.util.SparseArray
 import androidx.fragment.app.Fragment
 import com.hearthappy.router.analysis.TargetObject
 import com.hearthappy.router.analysis.TargetServiceProvider
-import com.hearthappy.router.core.Courier
-import com.hearthappy.router.core.Courier.Companion.GENERATE_ROUTER_ACTIVITY_PKG
-import com.hearthappy.router.core.Courier.Companion.GENERATE_ROUTER_PROVIDER_PKG
-import com.hearthappy.router.core.Courier.Companion.logger
 import com.hearthappy.router.core.Router
+import com.hearthappy.router.core.Sorter
+import com.hearthappy.router.core.Sorter.Companion.GENERATE_ROUTER_ACTIVITY_PKG
+import com.hearthappy.router.core.Sorter.Companion.GENERATE_ROUTER_PROVIDER_PKG
+import com.hearthappy.router.core.Sorter.Companion.logger
 import com.hearthappy.router.enums.InjectParams
 import com.hearthappy.router.exception.HandlerException
 import com.hearthappy.router.exception.NoRouteFoundException
@@ -29,12 +29,12 @@ class ClassLoaderServiceImpl : ClassLoaderService {
         return routerClass.getAnnotation(target) ?: throw HandlerException("No Annotation found for className ['$className']")
     }
 
-    override fun <A> getAnnotationClass(target: Class<A>, className: String, courier: Courier): Any {
+    override fun <A> getAnnotationClass(target: Class<A>, className: String, sorter: Sorter): Any {
         val routerClass = Class.forName(className)
         val tb = routerClass.getAnnotation(TargetObject::class.java) ?: throw NoRouteFoundException("No instance found for className ['$className']")
         val instance = tb.name.java.newInstance() //TODO Fragment初始化，支持androidx和supper.v4
         if (instance is Fragment) {
-            instance.arguments = courier.getExtras()
+            instance.arguments = sorter.getExtras()
         } //        else if (instance is android.support.v4.app.Fragment) {
         //            (instance as android.support.v4.app.Fragment).setArguments(mailman.getExtras())
         //        }

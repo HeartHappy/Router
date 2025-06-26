@@ -1,7 +1,7 @@
 package com.hearthappy.router.service.impl
 
 import com.hearthappy.router.analysis.TargetInterceptor
-import com.hearthappy.router.core.Courier.Companion.GENERATE_ROUTER_INTERCEPTOR_PKG
+import com.hearthappy.router.core.Sorter.Companion.GENERATE_ROUTER_INTERCEPTOR_PKG
 import com.hearthappy.router.interfaces.IInterceptor
 import com.hearthappy.router.service.ClassLoaderService
 import com.hearthappy.router.service.InterceptorService
@@ -39,7 +39,4 @@ class InterceptorServiceImpl : InterceptorService {
 
     data class InterceptorRecord(val interceptor : IInterceptor, val priority : Int, val name : String)
 
-    companion object {
-        private const val TAG = "InterceptorServiceImpl"
-    }
 }

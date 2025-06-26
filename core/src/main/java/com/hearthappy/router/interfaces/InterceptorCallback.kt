@@ -9,7 +9,7 @@ interface InterceptorCallback {
     /**
      * The interceptor continues the routing process
      */
-    fun onContinue(director: CourierManager)
+    fun onContinue(director: ICourier)
 
     /**
      * The interceptor interrupts the routing process and only interrupts it when an exception is thrown

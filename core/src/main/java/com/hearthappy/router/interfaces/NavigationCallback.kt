@@ -1,6 +1,6 @@
 package com.hearthappy.router.interfaces
 
-import com.hearthappy.router.core.Courier
+import com.hearthappy.router.core.Sorter
 
 /**
  * Created Date: 2025/6/25
@@ -12,28 +12,28 @@ interface NavigationCallback {
     /**
      * Callback when find the destination.
      *
-     * @param courier meta
+     * @param sorter meta
      */
-    fun onFound(courier: Courier)
+    fun onFound(sorter: Sorter)
 
     /**
      * Callback after lose your way.
      *
-     * @param courier meta
+     * @param sorter meta
      */
-    fun onLost(courier: Courier)
+    fun onLost(sorter: Sorter)
 
     /**
      * Callback after navigation.
      *
-     * @param courier meta
+     * @param sorter meta
      */
-    fun onArrival(courier: Courier)
+    fun onArrival(sorter: Sorter)
 
     /**
      * Callback on interrupt.
      *
-     * @param courier meta
+     * @param sorter meta
      */
-    fun onInterrupt(courier: Courier)
+    fun onInterrupt(sorter: Sorter)
 }

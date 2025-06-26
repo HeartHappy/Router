@@ -2,6 +2,7 @@ package com.hearthappy.route.interceptor
 
 import android.util.Log
 import android.widget.Toast
+import com.hearthappy.common_api.RouterPath
 import com.hearthappy.route.R
 import com.hearthappy.router.annotations.Interceptor
 import com.hearthappy.router.launcher.Sorter
@@ -12,7 +13,7 @@ import com.hearthappy.router.interfaces.InterceptorCallback
 
 @Interceptor(priority = 0, name = "InterceptorName") class ActivityInterceptor : IInterceptor {
     override fun intercept(sorter: Sorter, callback: InterceptorCallback) {
-        if (sorter.getPath() == "/model/ui") {
+        if (sorter.getPath() == RouterPath.CASE_ACTIVITY_FOR_RESULT) {
 
             if (interceptorSwitch) {
                 /**

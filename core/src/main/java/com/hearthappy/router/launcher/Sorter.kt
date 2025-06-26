@@ -10,13 +10,14 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.hearthappy.router.analysis.TargetObject
 import com.hearthappy.router.core.BuildConfig
+import com.hearthappy.router.core.ICourier
+import com.hearthappy.router.core.ILogger
+import com.hearthappy.router.core.ISorter
 import com.hearthappy.router.core.Pack
 import com.hearthappy.router.enums.RouteType
 import com.hearthappy.router.exception.HandlerException
 import com.hearthappy.router.ext.renaming
 import com.hearthappy.router.ext.toSmartBundle
-import com.hearthappy.router.core.ICourier
-import com.hearthappy.router.core.ILogger
 import com.hearthappy.router.interfaces.InterceptorCallback
 import com.hearthappy.router.interfaces.NavigationCallback
 import com.hearthappy.router.logger.DefaultLogger
@@ -126,7 +127,7 @@ abstract class Sorter : ICourier {
             val shouldContinue = AtomicBoolean(true)
             callback?.onFound(this)
             val records = interceptorService.getRouterInterceptors()
-            if (records.isNotEmpty()) {
+            if (records.isNotEmpty() && !pack.isGreenChannel()) {
                 val isContinue = interceptionHandler(records, shouldContinue, callback)
                 if (isContinue) navigationForward(targetObject, currentContext, requestCode, callback)
             } else navigationForward(targetObject, currentContext, requestCode, callback)
@@ -135,6 +136,11 @@ abstract class Sorter : ICourier {
             if (BuildConfig.DEBUG) Toast.makeText(currentContext, "No route found for path ['${pack.path}']", Toast.LENGTH_SHORT).show()
             callback?.onLost(this)
         }
+    }
+
+    override fun greenChannel(): ISorter {
+        pack.greenChannel = true
+        return this
     }
 
     override fun getDestination(): Class<*> {

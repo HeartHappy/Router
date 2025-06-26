@@ -18,6 +18,8 @@ interface ISorter {
 
     fun navigation(context: Context?, requestCode: Int, callback: NavigationCallback?)
 
+    fun greenChannel():ISorter
+
     fun getDestination(): Class<*>
 
     fun getInstance(): Any

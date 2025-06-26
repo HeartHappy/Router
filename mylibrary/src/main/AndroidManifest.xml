@@ -3,8 +3,9 @@
 
     <application>
         <activity
-            android:name=".RouterActivity"
+            android:name=".ModulesActivity"
             android:exported="false" />
+        <activity android:name="com.hearthappy.mylibrary.ForResultActivity" />
     </application>
 
 </manifest>

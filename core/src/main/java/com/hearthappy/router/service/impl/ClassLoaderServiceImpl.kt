@@ -69,53 +69,56 @@ class ClassLoaderServiceImpl : ClassLoaderService {
 
     override fun inject(thiz: Any) {
         val className = thiz::class.qualifiedName ?: return
-      //No parameters are carried //        if (extras?.isEmpty == true) return
-        val routerPkg = GENERATE_ROUTER_ACTIVITY_PKG.plus(className.routeRenaming())
-        val forName = Class.forName(routerPkg)
-        val newInstance = forName.getDeclaredConstructor().newInstance()
+        try {
+            val routerPkg = GENERATE_ROUTER_ACTIVITY_PKG.plus(className.routeRenaming())
+            val forName = Class.forName(routerPkg)
+            val newInstance = forName.getDeclaredConstructor().newInstance()
 
-        val declaredField = forName.getDeclaredField("params")
-        declaredField.isAccessible = true
-        val params = (declaredField.get(newInstance) as List<*>).filterIsInstance<InjectParams>() //The target object needs to inject a parameter list
-        val extras = when (thiz) {
-            is Fragment -> thiz.arguments
-            is Activity -> thiz.intent.extras
-            else -> null
-        }
-        params.forEach { paramInfo ->
-            try {
-                val field = thiz::class.java.getDeclaredField(paramInfo.fieldName)
-                field.isAccessible = true //传递的参数
-                val value = extras?.get(paramInfo.name)
-                value?.let { result ->
-                    when (paramInfo.type) {
-                        String::class -> field.set(thiz, result as? String)
-                        Integer::class -> field.set(thiz, result as? Int)
-                        Short::class -> field.set(thiz, result as? Short)
-                        Long::class -> field.set(thiz, result as? Long)
-                        Byte::class -> field.set(thiz, result as? Byte)
-                        Character::class -> field.set(thiz, result as? Char)
-                        Float::class -> field.set(thiz, result as? Float)
-                        Double::class -> field.set(thiz, result as? Double)
-                        Char::class -> field.set(thiz, result as? Char)
-                        Parcelable::class -> field.set(thiz, result as? Parcelable)
-                        ArrayList::class -> field.set(thiz, result as? ArrayList<*>)
-                        SparseArray::class -> field.set(thiz, result as? SparseArray<*>)
-                        Boolean::class -> field.set(thiz, result as? Boolean)
-                        else -> field.setObject(result, paramInfo, thiz) // 处理复杂对象类型
-                    }
-                } ?: let { //该注入参数没有传递
-                    if (paramInfo.type.java.isInterface && ProviderService::class.java.isAssignableFrom(paramInfo.type.java)) { //注入服务
-                        logger.debug("inject: ProviderService:${paramInfo.type.java.simpleName}")
-                        field.set(thiz, Router.getInstance(paramInfo.type.java))
-                    } else {
-                        logger.debug("inject: No parameters were passed in :$paramInfo")
-                    }
-                }
-
-            } catch (e: Exception) {
-                logger.error(Router.TAG, "Failed to inject field: ${paramInfo.fieldName}", e)
+            val declaredField = forName.getDeclaredField("params")
+            declaredField.isAccessible = true
+            val params = (declaredField.get(newInstance) as List<*>).filterIsInstance<InjectParams>() //The target object needs to inject a parameter list
+            val extras = when (thiz) {
+                is Fragment -> thiz.arguments
+                is Activity -> thiz.intent.extras
+                else -> null
             }
+            params.forEach { paramInfo ->
+                try {
+                    val field = thiz::class.java.getDeclaredField(paramInfo.fieldName)
+                    field.isAccessible = true //传递的参数
+                    val value = extras?.get(paramInfo.name)
+                    value?.let { result ->
+                        when (paramInfo.type) {
+                            String::class -> field.set(thiz, result as? String)
+                            Integer::class -> field.set(thiz, result as? Int)
+                            Short::class -> field.set(thiz, result as? Short)
+                            Long::class -> field.set(thiz, result as? Long)
+                            Byte::class -> field.set(thiz, result as? Byte)
+                            Character::class -> field.set(thiz, result as? Char)
+                            Float::class -> field.set(thiz, result as? Float)
+                            Double::class -> field.set(thiz, result as? Double)
+                            Char::class -> field.set(thiz, result as? Char)
+                            Parcelable::class -> field.set(thiz, result as? Parcelable)
+                            ArrayList::class -> field.set(thiz, result as? ArrayList<*>)
+                            SparseArray::class -> field.set(thiz, result as? SparseArray<*>)
+                            Boolean::class -> field.set(thiz, result as? Boolean)
+                            else -> field.setObject(result, paramInfo, thiz) // 处理复杂对象类型
+                        }
+                    } ?: let { //该注入参数没有传递
+                        if (paramInfo.type.java.isInterface && ProviderService::class.java.isAssignableFrom(paramInfo.type.java)) { //注入服务
+                            logger.debug("inject: ProviderService:${paramInfo.type.java.simpleName}")
+                            field.set(thiz, Router.getInstance(paramInfo.type.java))
+                        } else {
+                            logger.debug("inject: No parameters were passed in :$paramInfo")
+                        }
+                    }
+
+                } catch (e: Exception) {
+                    logger.error(Router.TAG, "Failed to inject field: ${paramInfo.fieldName}", e)
+                }
+            }
+        } catch (e: ClassNotFoundException) {
+            throw HandlerException("No relevant routes found for ['$thiz']")
         }
     }
 

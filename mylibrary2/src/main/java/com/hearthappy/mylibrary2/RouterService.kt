@@ -5,10 +5,11 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import com.hearthappy.common_api.RouterPath
 import com.hearthappy.mylibrary2.NotificationService.Companion.START_ID
 import com.hearthappy.router.annotations.Route
 
-@Route("/service/test") class RouterService : Service() {
+@Route(RouterPath.SERVICE_BACKEND) class RouterService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -25,7 +26,7 @@ import com.hearthappy.router.annotations.Route
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         //发送前台通知，适配Android 8.0和以下版本
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            startForeground(START_ID, NotificationService.buildNotification(this, "Notification Message", "Routing startup service", Router2Activity::class.java))
+            startForeground(START_ID, NotificationService.buildNotification(this, "Notification Message", "Routing startup service", Modules2Activity::class.java))
         } else {
             startForeground(START_ID, Notification())
         }

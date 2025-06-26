@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import com.hearthappy.common_api.HelloService
+import com.hearthappy.common_api.RouterPath
 import com.hearthappy.mylibrary.databinding.ActivityRouterBinding
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
@@ -18,7 +19,7 @@ import com.hearthappy.router.launcher.Sorter
 import com.hearthappy.router.interfaces.NavigationCallback
 
 
-@Route("/model/ui") class RouterActivity : AppCompatActivity() {
+@Route(RouterPath.MODULES_UI) class ModulesActivity : AppCompatActivity() {
 
 
     private lateinit var viewBinding: ActivityRouterBinding
@@ -66,7 +67,7 @@ import com.hearthappy.router.interfaces.NavigationCallback
                 Router.build("/model2/ui").withString("name", "KSP Router!").navigation()
             }
             btnJump6.setOnClickListener {
-                Router.build("/model2/ui").navigation(this@RouterActivity, 100, object : NavigationCallback {
+                Router.build("/model2/ui").navigation(this@ModulesActivity, 100, object : NavigationCallback {
                     override fun onFound(sorter: Sorter) {
                         Log.d(TAG, "onFound: ${sorter.getPath()}")
                     }
@@ -85,7 +86,7 @@ import com.hearthappy.router.interfaces.NavigationCallback
                 })
             }
             btnJump7.setOnClickListener {
-                activityResultLauncher.launch(Intent(this@RouterActivity, Router.build("/model2/ui").getDestination()))
+                activityResultLauncher.launch(Intent(this@ModulesActivity, Router.build("/model2/ui").getDestination()))
             }
         }
     }

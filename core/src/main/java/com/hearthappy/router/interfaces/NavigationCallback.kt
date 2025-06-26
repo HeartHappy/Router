@@ -5,7 +5,7 @@ import com.hearthappy.router.launcher.Sorter
 /**
  * Created Date: 2025/6/25
  * @author ChenRui
- * ClassDescription：Callback after navigation
+ * ClassDescription：Navigation callback
  */
 interface NavigationCallback {
 

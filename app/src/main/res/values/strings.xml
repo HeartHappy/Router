@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Route</string>
+    <string name="hint_service_start_msg">The service has been started, you can check it by pulling down the notification bar on your phone</string>
 </resources>

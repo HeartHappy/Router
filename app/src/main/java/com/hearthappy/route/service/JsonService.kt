@@ -1,7 +1,7 @@
 package com.hearthappy.route.service
 
 import com.google.gson.Gson
-import com.hearthappy.route.RouterPath
+import com.hearthappy.common_api.RouterPath
 import com.hearthappy.router.annotations.Route
 import com.hearthappy.router.service.SerializationService
 import java.lang.reflect.Type

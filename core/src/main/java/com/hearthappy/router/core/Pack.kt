@@ -16,12 +16,17 @@ class Pack {
     internal var appContext: Context? = null
     internal var context: Context? = null
     internal var optionsCompat: Bundle? = null
+    internal var greenChannel = false
 
     fun getContext(): Context {
-        return context?: appContext?: throw HandlerException("context is null")
+        return context ?: appContext ?: throw HandlerException("context is null")
     }
 
-    fun clear(){
+    fun isGreenChannel(): Boolean {
+        return greenChannel
+    }
+
+    fun clear() {
         enterAnim = -1
         exitAnim = -1
         path = ""
@@ -32,5 +37,6 @@ class Pack {
         uri = null
         optionsCompat?.clear()
         optionsCompat = null
+        greenChannel = false
     }
 }

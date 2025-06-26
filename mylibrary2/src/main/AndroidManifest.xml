@@ -3,7 +3,7 @@
 
     <application>
         <activity
-            android:name=".Router2Activity"
+            android:name=".Modules2Activity"
             android:launchMode="singleTop"
             android:exported="true" >
             <intent-filter>

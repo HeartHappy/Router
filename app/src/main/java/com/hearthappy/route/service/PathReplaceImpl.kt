@@ -1,7 +1,7 @@
 package com.hearthappy.route.service
 
 import android.net.Uri
-import com.hearthappy.route.RouterPath
+import com.hearthappy.common_api.RouterPath
 import com.hearthappy.router.annotations.Route
 import com.hearthappy.router.service.PathReplaceService
 

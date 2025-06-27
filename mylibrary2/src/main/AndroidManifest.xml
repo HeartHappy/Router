@@ -4,7 +4,7 @@
     <application>
         <activity
             android:name=".Modules2Activity"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:exported="true" >
             <intent-filter>
                 <data
@@ -30,6 +30,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
+        <activity android:name="com.hearthappy.mylibrary2.InjectActivity" android:launchMode="singleTask" android:exported="false" />
+
         <service android:name=".RouterService" android:exported="false"/>
     </application>
 

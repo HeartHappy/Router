@@ -11,7 +11,7 @@ import java.io.Serializable
  * @author ChenRui
  * ClassDescription：Courier Manager
  */
-interface ICourier: ISorter {
+interface ICourier : ISorter {
 
     fun addFlags(flags: Int): ICourier
 
@@ -41,19 +41,13 @@ interface ICourier: ISorter {
 
     fun withParcelable(key: String, value: Parcelable): ICourier
 
-    fun withParcelableArray(key: String, value: Array<Parcelable>): ICourier
-
-    fun withParcelableArrayList(key: String, value: ArrayList<Parcelable>): ICourier
-
-    fun withSparseParcelableArray(key: String, value: SparseArray<out Parcelable>): ICourier
-
-    fun withIntegerArrayList(key: String, value: ArrayList<Int>): ICourier
-
-    fun withStringArrayList(key: String, value: ArrayList<String>): ICourier
-
-    fun withCharSequenceArrayList(key: String, value: ArrayList<CharSequence>): ICourier
-
     fun withSerializable(key: String, value: Serializable): ICourier
+
+    fun withBundle(key: String, bundle: Bundle): ICourier
+
+
+    //Array
+    fun withIntArray(key: String, value: IntArray): ICourier
 
     fun withByteArray(key: String, value: ByteArray): ICourier
 
@@ -63,11 +57,34 @@ interface ICourier: ISorter {
 
     fun withFloatArray(key: String, value: FloatArray): ICourier
 
+    fun withDoubleArray(key: String, value: DoubleArray): ICourier
+
+    fun withBooleanArray(key: String, value: BooleanArray): ICourier
+
+    fun withStringArray(key: String, value: Array<String>): ICourier
+
+    fun withLongArray(key: String, value: LongArray): ICourier
+
     fun withCharSequenceArray(key: String, value: Array<CharSequence>): ICourier
 
+    fun withParcelableArray(key: String, value: Array<Parcelable>): ICourier
+
+    // ArrayList
+    fun withParcelableArrayList(key: String, value: ArrayList<Parcelable>): ICourier
+
+    fun withSparseParcelableArray(key: String, value: SparseArray<out Parcelable>): ICourier
+
+    fun withIntArrayList(key: String, value: ArrayList<Int>): ICourier
+
+    fun withStringArrayList(key: String, value: ArrayList<String>): ICourier
+
+    fun withCharSequenceArrayList(key: String, value: ArrayList<CharSequence>): ICourier
+
+
+    //animator
     fun withTransition(enterAnim: Int, exitAnim: Int): ICourier
 
     fun withOptionsCompat(compat: ActivityOptionsCompat): ICourier
 
-    fun withBundle(key: String, bundle: Bundle): ICourier
+
 }

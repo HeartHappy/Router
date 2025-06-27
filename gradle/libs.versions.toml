@@ -1,6 +1,6 @@
 [versions]
 agp = "7.2.2"
-androidBasicKtx = "1.0.5"
+androidBasicKtx = "1.0.7"
 kotlin = "2.0.10"
 jetbrainsKotlinJvm = "2.0.10"
 kotlinReflectVersion = "1.6.0"

@@ -2,7 +2,6 @@ package com.hearthappy.mylibrary2
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.hearthappy.common_api.HelloService
 import com.hearthappy.common_api.RouterPath
@@ -18,7 +17,8 @@ import java.util.Locale
 
     private lateinit var viewBinding: ActivityRouter2Binding
 
-    @Autowired var title = ""
+    @Autowired var name = ""
+
 
     @Autowired var age: Int = 0
 
@@ -31,7 +31,7 @@ import java.util.Locale
         setTitle("Modules2 : Modules2Activity")
         setContentView(viewBinding.root)
         viewBinding.apply {
-            if (title.isNotEmpty()) tvTitle.text = String.format(Locale.CHINA, "name: %s,age: %d\n", title, age).plus(helloService?.sayHello("KSP Router"))
+            if (name.isNotEmpty()) tvTitle.text = String.format(Locale.CHINA, "name: %s,age: %d\n", name, age).plus(helloService?.sayHello("KSP Router"))
             btnJump.setOnClickListener {
                 Router.build(RouterPath.MAIN_ACTIVITY).navigation()
             }

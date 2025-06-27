@@ -14,7 +14,7 @@
         android:theme="@style/Theme.Route"
         tools:targetApi="31">
         <activity
-            android:name=".demo.WithActivity"
+            android:name=".demo.WithParametersActivity"
             android:exported="false"
             android:launchMode="singleTask" />
         <activity

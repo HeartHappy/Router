@@ -14,9 +14,9 @@ import com.hearthappy.router.service.PathReplaceService
  */
 @Route(RouterPath.SERVICE_PATH_REPLACE) class PathReplaceImpl : PathReplaceService {
     override fun forString(path: String): String {
-        //        if (path == RouterPath.USER_PROFILE_ACTIVITY) {
-        //            return RouterPath.MODEL2_UI
-        //        }
+        if (path == RouterPath.MODULES_UI) {
+            return RouterPath.MODULES2_UI
+        }
         return path
     }
 
@@ -26,13 +26,13 @@ import com.hearthappy.router.service.PathReplaceService
      * @return Uri
      */
     override fun forUri(uri: Uri): Uri {
-        //        if (uri.path == RouterPath.MODEL2_UI) {
-        //            return uri.buildUpon().apply {
-        //                clearQuery()
-        //                appendQueryParameter("name", "KSP Router!")
-        //                appendQueryParameter("age", "40")
-        //            }.build()
-        //        }
+        if (uri.path == RouterPath.MODULES2_UI) {
+            return uri.buildUpon().apply {
+                clearQuery()
+                appendQueryParameter("name", "KSP Router!")
+                appendQueryParameter("age", "30")
+            }.build()
+        }
         return uri
     }
 }

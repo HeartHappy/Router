@@ -183,8 +183,8 @@ abstract class Sorter : ICourier {
                         if (this@apply.action.isNotEmpty()) this.action = this@apply.action
                     }
                     when (currentContext) {
-                        is Activity -> ActivityCompat.startActivityForResult(currentContext, intent, requestCode, getOptionsCompat()).also { pendingTransition(currentContext) }
-                        else -> currentContext.startActivity(intent, getOptionsCompat())
+                        is Activity -> ActivityCompat.startActivityForResult(currentContext, intent, requestCode, getOptionsCompat()).also { pendingTransition(currentContext) } //                        else -> currentContext.startActivity(intent, getOptionsCompat())
+                        else -> currentContext.startActivity(intent)
                     }
 
 
@@ -232,6 +232,20 @@ abstract class Sorter : ICourier {
 
     private fun completed() {
         pack.clear()
+    }
+
+    /**
+     * 判断 Bundle 是否为 ActivityOptionsCompat 生成的动画 Bundle
+     */
+    private fun isAnimationBundle(bundle: Bundle?): Boolean {
+        if (bundle == null || bundle.isEmpty) return false
+
+        // 检查动画 Bundle 特有的键
+        val hasTransitionName = bundle.containsKey("android:activity.transitionCompleteListener")
+        val hasWindowAnimations = bundle.containsKey("android:activity.sharedElementNames")
+        val hasActivityAnimations = bundle.containsKey("android:activity.animType")
+
+        return hasTransitionName || hasWindowAnimations || hasActivityAnimations
     }
 
     companion object {

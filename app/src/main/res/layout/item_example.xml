@@ -5,7 +5,8 @@
 
     <TextView
         android:id="@+id/tvExampleTitle"
-        android:gravity="center"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical"
         android:textSize="16sp"
         android:textStyle="bold"
         android:layout_width="match_parent"

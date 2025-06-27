@@ -6,6 +6,6 @@ import com.hearthappy.route.model.ExampleBean
 
 class ExampleAdapter :AbsSpecialAdapter<ItemExampleBinding, ExampleBean>() {
     override fun ItemExampleBinding.bindViewHolder(data: ExampleBean, position: Int) {
-        tvExampleTitle.text=data.title
+        tvExampleTitle.text=position.plus(1).toString().plus("、${data.title}")
     }
 }

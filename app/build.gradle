@@ -46,13 +46,13 @@ dependencies {
     implementation libs.androidx.activity
     implementation libs.androidx.constraintlayout
     implementation libs.android.basic.ktx
-    implementation project(':common-api')
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core
 
     //gson
     implementation libs.gson
+    implementation project(':common-api')
 
     implementation project(':mylibrary')
     implementation project(':mylibrary2')

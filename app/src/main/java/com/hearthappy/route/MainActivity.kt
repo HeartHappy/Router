@@ -48,12 +48,6 @@ import com.hearthappy.router.launcher.Router
                         val sayHello = instance.sayHello("KSP Router") //                        instance.sayHello("interface service from HelloService")
                         tvDes.text = sayHello
                     }
-                    RouterPath.CASE_URI_BUILD->{
-                        //uri Use %20 to replace spaces.
-                        //adb shell am start -a android.intent.action.VIEW -d  "hearthappy://kotlin.ksp.com/model2/ui?title=KSP%20Router!\&age=18"
-                        val uri = Uri.parse("hearthappy://kotlin.ksp.com/model2/ui?title=Uri jump to Modules2Activity &age=18")
-                        Router.build(uri).navigation()
-                    }
                     else -> Router.build(data.path).greenChannel().navigation()
                 }
             }
@@ -65,8 +59,7 @@ import com.hearthappy.router.launcher.Router
 
     private fun getExampleData(): MutableList<ExampleBean> {
         return mutableListOf<ExampleBean>().apply {
-            add(ExampleBean(RouterPath.CASE_PATH_BUILD, "Build by path"))
-            add(ExampleBean(RouterPath.CASE_URI_BUILD, "Build by Uri"))
+            add(ExampleBean(RouterPath.CASE_PATH_BUILD, "Jump with parameters"))
             add(ExampleBean(RouterPath.CASE_PATH_REPLACE, "Path processing"))
             add(ExampleBean(RouterPath.CASE_INTERCEPTOR, "Interceptor"))
             add(ExampleBean(RouterPath.CASE_ACTIVITY_FOR_RESULT, "ActivityForResult"))

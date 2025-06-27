@@ -2,6 +2,7 @@ package com.hearthappy.router.launcher
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import android.util.SparseArray
 import androidx.core.app.ActivityOptionsCompat
 import com.hearthappy.router.exception.HandlerException
@@ -99,6 +100,7 @@ class Courier : Sorter() {
         return this
     }
 
+
     override fun withParcelableArrayList(key: String, value: ArrayList<Parcelable>): ICourier {
         pack.bundle.putParcelableArrayList(key, value)
         return this
@@ -109,7 +111,7 @@ class Courier : Sorter() {
         return this
     }
 
-    override fun withIntegerArrayList(key: String, value: ArrayList<Int>): ICourier {
+    override fun withIntArrayList(key: String, value: ArrayList<Int>): ICourier {
         pack.bundle.putIntegerArrayList(key, value)
         return this
     }
@@ -126,6 +128,11 @@ class Courier : Sorter() {
 
     override fun withSerializable(key: String, value: Serializable): ICourier {
         pack.bundle.putSerializable(key, value)
+        return this
+    }
+
+    override fun withIntArray(key: String, value: IntArray): ICourier {
+        pack.bundle.putIntArray(key, value)
         return this
     }
 
@@ -149,6 +156,26 @@ class Courier : Sorter() {
         return this
     }
 
+    override fun withDoubleArray(key: String, value: DoubleArray): ICourier {
+        pack.bundle.putDoubleArray( key, value)
+        return this
+    }
+
+    override fun withBooleanArray(key: String, value: BooleanArray): ICourier {
+        pack.bundle.putBooleanArray(key, value)
+        return this
+    }
+
+    override fun withStringArray(key: String, value: Array<String>): ICourier {
+        pack.bundle.putStringArray(key, value)
+        return this
+    }
+
+    override fun withLongArray(key: String, value: LongArray): ICourier {
+        pack.bundle.putLongArray(key, value)
+        return this
+    }
+
     override fun withCharSequenceArray(key: String, value: Array<CharSequence>): ICourier {
         pack.bundle.putCharSequenceArray(key, value)
         return this
@@ -162,6 +189,7 @@ class Courier : Sorter() {
 
     override fun withOptionsCompat(compat: ActivityOptionsCompat): ICourier {
         pack.optionsCompat = compat.toBundle()
+        logger.debug("withOptionsCompat:$compat")
         return this
     }
 

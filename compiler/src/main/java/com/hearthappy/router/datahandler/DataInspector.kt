@@ -69,7 +69,7 @@ object DataInspector {
     }
 
     fun isCollectionType(typeName: String): Boolean {
-        return typeName.startsWith("kotlin.collections.List") || typeName.startsWith("kotlin.collections.Set") || typeName.startsWith("kotlin.collections.Map")
+        return typeName.startsWith("kotlin.collections.ArrayList")|| typeName.startsWith("kotlin.collections.MutableList") || typeName.startsWith("kotlin.collections.List") || typeName.startsWith("kotlin.collections.Set") || typeName.startsWith("kotlin.collections.Map")
     }
 
     fun <T1 : Any, T2 : Any> bothNonNull(a: T1?, b: T2?, block: (T1, T2) -> Unit) {

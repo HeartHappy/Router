@@ -3,6 +3,9 @@ package com.hearthappy.router.datahandler
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeAlias
+import com.google.devtools.ksp.symbol.KSTypeReference
 import com.hearthappy.router.enums.RouteType
 import com.hearthappy.router.ext.RouterTypeNames.Activity
 import com.hearthappy.router.ext.RouterTypeNames.AppCompatActivity
@@ -15,7 +18,9 @@ import com.hearthappy.router.ext.RouterTypeNames.Service
 import com.hearthappy.router.logger.KSPLog
 import com.hearthappy.router.model.RouteMeta
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 
 
 fun String.reRouterName(): String {
@@ -23,20 +28,18 @@ fun String.reRouterName(): String {
 }
 
 
-// 类型转换逻辑
-//fun KSClassDeclaration.convertType(): RouteMeta {
-//    for (allSuperType in getAllSuperTypes()) {
-//        KSPLog.print("classname: ${allSuperType.toClassName()}")
-//        when (val className = allSuperType.toClassName()) {
-//            SerializationService, PathReplaceService, ProviderService -> return RouteMeta(RouteType.SERVICE_PROVIDER, className)
-//            AppCompatActivity, Activity -> return RouteMeta(RouteType.ACTIVITY, className)
-//            Service -> return RouteMeta(RouteType.SERVICE, className)
-//            Fragment -> return RouteMeta(RouteType.FRAGMENT, className)
-//            BroadcastReceiver -> return RouteMeta(RouteType.BROADCAST, className)
-//        }
-//    }
-//    return RouteMeta(RouteType.UNKNOWN, ClassName.bestGuess("com.hearthappy.router.UNKNOWN"))
-//}
+// 解析类型别名的实际类
+fun KSType.toResolvedClassName(): TypeName {
+    return when (val declaration = declaration) {
+        is KSClassDeclaration -> declaration.toClassName()
+        is KSTypeAlias -> {
+            // 获取类型别名的 underlying type
+           declaration.type.toTypeName()
+        }
+        else -> error("Unsupported type: $declaration")
+    }
+}
+
 // 定义目标类型与RouteType的映射表（按匹配优先级排序）
 val typeMappings = listOf(
     // 接口类映射（优先级高于普通类）

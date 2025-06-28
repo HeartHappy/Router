@@ -1,6 +1,5 @@
 package com.hearthappy.route
 
-import android.net.Uri
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -59,7 +58,7 @@ import com.hearthappy.router.launcher.Router
 
     private fun getExampleData(): MutableList<ExampleBean> {
         return mutableListOf<ExampleBean>().apply {
-            add(ExampleBean(RouterPath.CASE_PATH_BUILD, "Jump with parameters"))
+            add(ExampleBean(RouterPath.CASE_WITH_PARAMETERS, "Jump with parameters"))
             add(ExampleBean(RouterPath.CASE_PATH_REPLACE, "Path processing"))
             add(ExampleBean(RouterPath.CASE_INTERCEPTOR, "Interceptor"))
             add(ExampleBean(RouterPath.CASE_ACTIVITY_FOR_RESULT, "ActivityForResult"))

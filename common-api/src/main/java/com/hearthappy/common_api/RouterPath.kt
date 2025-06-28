@@ -4,7 +4,7 @@ object RouterPath {
 
     const val MAIN_ACTIVITY = "/launcher/main"
     // case
-    const val CASE_PATH_BUILD = "/case/build/path"
+    const val CASE_WITH_PARAMETERS = "/case/build/path"
     const val CASE_ACTIVITY_FOR_RESULT = "/case/activity"
     const val CASE_PATH_REPLACE = "/case/path/replace"
     const val CASE_INTERCEPTOR = "/case/interception"

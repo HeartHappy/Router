@@ -75,24 +75,27 @@ class ClassLoaderServiceImpl : ClassLoaderService {
             val routerPkg = GENERATE_ROUTER_ACTIVITY_PKG.plus(className.routeRenaming())
             val forName = Class.forName(routerPkg)
             val newInstance = forName.getDeclaredConstructor().newInstance()
+            val inject = forName.getMethod("inject", Any::class.java)
+            inject.isAccessible=true
+            inject.invoke(newInstance, thiz)
 
-            val declaredField = forName.getDeclaredField("params")
-            declaredField.isAccessible = true
-            val params = (declaredField.get(newInstance) as List<*>).filterIsInstance<InjectParams>() //The target object needs to inject a parameter list
-            val extras = when (thiz) {
-                is Fragment -> thiz.arguments
-                is Activity -> thiz.intent.extras
-                else -> null
-            }
-            params.forEach { paramInfo ->
-                try {
-                    val field = thiz::class.java.getDeclaredField(paramInfo.fieldName)
-                    field.isAccessible = true //传递的参数
-                    setInjectionValue(extras, paramInfo, field, thiz)
-                } catch (e : Exception) {
-                    logger.error(Router.TAG, "Failed to inject field: ${paramInfo.fieldName}", e)
-                }
-            }
+        //            val declaredField = forName.getDeclaredField("params")
+//            declaredField.isAccessible = true
+//            val params = (declaredField.get(newInstance) as List<*>).filterIsInstance<InjectParams>() //The target object needs to inject a parameter list
+//            val extras = when (thiz) {
+//                is Fragment -> thiz.arguments
+//                is Activity -> thiz.intent.extras
+//                else -> null
+//            }
+//            params.forEach { paramInfo ->
+//                try {
+//                    val field = thiz::class.java.getDeclaredField(paramInfo.fieldName)
+//                    field.isAccessible = true //传递的参数
+//                    setInjectionValue(extras, paramInfo, field, thiz)
+//                } catch (e : Exception) {
+//                    logger.error(Router.TAG, "Failed to inject field: ${paramInfo.fieldName}", e)
+//                }
+//            }
         } catch (e : ClassNotFoundException) {
             throw HandlerException("No relevant routes found for ['$thiz']")
         }

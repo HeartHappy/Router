@@ -28,17 +28,7 @@ fun String.reRouterName(): String {
 }
 
 
-// 解析类型别名的实际类
-fun KSType.toResolvedClassName(): TypeName {
-    return when (val declaration = declaration) {
-        is KSClassDeclaration -> declaration.toClassName()
-        is KSTypeAlias -> {
-            // 获取类型别名的 underlying type
-           declaration.type.toTypeName()
-        }
-        else -> error("Unsupported type: $declaration")
-    }
-}
+
 
 // 定义目标类型与RouteType的映射表（按匹配优先级排序）
 val typeMappings = listOf(

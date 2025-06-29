@@ -13,10 +13,11 @@ import com.squareup.kotlinpoet.ClassName
 object AndroidTypeNames {
     internal val Application = ClassName(APPLICATION_PKG, APPLICATION)
     internal val Context = ClassName(CONTEXT_PKG, CONTEXT)
+    internal val Log=ClassName("android.util", "Log")
 }
 
 object RouterTypeNames {
-    internal val Router = ClassName("com.hearthappy.router.core.Router", "Router")
+    internal val Router = ClassName("com.hearthappy.router.launcher", "Router")
     internal val RouterParamInfo = ClassName("com.hearthappy.router.enums", "InjectParams")
     internal val TargetActivity=ClassName("com.hearthappy.router.annotations", "TargetActivity")
     internal val AppCompatActivity=ClassName("androidx.appcompat.app",  "AppCompatActivity")
@@ -29,6 +30,7 @@ object RouterTypeNames {
     internal val SerializationService=ClassName("com.hearthappy.router.service", "SerializationService")
     internal val PathReplaceService=ClassName("com.hearthappy.router.service", "PathReplaceService")
     internal val ProviderService=ClassName("com.hearthappy.router.service", "ProviderService")
+    internal val AutowiredService:ClassName = ClassName("com.hearthappy.router.service", "AutowiredService")
 }
 
 object CollectionsTypeNames{
@@ -59,4 +61,6 @@ object KotlinTypeNames {
     val RECEIVE_CHANNEL = ClassName("kotlinx.coroutines.channels", "ReceiveChannel")
     val SEND_CHANNEL = ClassName("kotlinx.coroutines.channels", "SendChannel")
     val FLOW = ClassName("kotlinx.coroutines.flow", "Flow")
+    //Any
+    val Any = ClassName("kotlin", "Any")
 }

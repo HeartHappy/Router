@@ -15,8 +15,10 @@ import com.hearthappy.router.constant.Constant
 import com.hearthappy.router.datahandler.DataInspector.EMPTY_STRING
 import com.hearthappy.router.datahandler.reRouterName
 import com.hearthappy.router.enums.RouteType
-import com.hearthappy.router.ext.CollectionsTypeNames
+import com.hearthappy.router.ext.AndroidTypeNames
+import com.hearthappy.router.ext.KotlinTypeNames
 import com.hearthappy.router.ext.RouterTypeNames
+import com.hearthappy.router.ext.RouterTypeNames.AutowiredService
 import com.hearthappy.router.ext.RouterTypeNames.PathReplaceService
 import com.hearthappy.router.ext.RouterTypeNames.ProviderService
 import com.hearthappy.router.ext.RouterTypeNames.SerializationService
@@ -26,8 +28,9 @@ import com.hearthappy.router.logger.KSPLog
 import com.hearthappy.router.model.RouterInfo
 import com.hearthappy.router.visitor.RouterVisitor
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
 import kotlin.system.measureTimeMillis
 
 /**
@@ -35,11 +38,11 @@ import kotlin.system.measureTimeMillis
  * @author ChenRui
  * ClassDescription： Parse and generate routing files
  */
-class RouterProcessor(private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory) : SymbolProcessor {
+class RouterProcessor(private val codeGenerator : CodeGenerator, private val poetFactory : IPoetFactory) : SymbolProcessor {
 
     private val routes = mutableMapOf<String, RouterInfo>()
 
-    override fun process(resolver: Resolver): List<KSAnnotated> {
+    override fun process(resolver : Resolver) : List<KSAnnotated> {
         val measureTimeMillis = measureTimeMillis {
             val routeSymbols = resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!)
             val invalidSymbols = routeSymbols.filter { it.validate() }.toList()
@@ -55,7 +58,7 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
     private fun generateRouterTable() {
         routes.forEach { (path, info) ->
             poetFactory.apply {
-                KSPLog.print("path = $path , class = ${info.clazz} , routerMeta:${info.routerMeta} ")
+                KSPLog.print("path = $path , class = ${info.clazz} ")
                 when (info.routerMeta.routeType) {
                     RouteType.ACTIVITY, RouteType.FRAGMENT, RouteType.SERVICE -> {
                         generatePath(path, info)
@@ -72,7 +75,7 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
         }
     }
 
-    private fun IPoetFactory.generateProvider(path: String, info: RouterInfo) {
+    private fun IPoetFactory.generateProvider(path : String, info : RouterInfo) {
         val providerFileName = info.routerMeta.superClass.run {
             when (this) {
                 SerializationService -> "Provider$$".plus("Json")
@@ -93,30 +96,34 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
     }
 
 
-    private fun IPoetFactory.generateRouter(info: RouterInfo) {
+    private fun IPoetFactory.generateRouter(info : RouterInfo) {
         val routerFileName = "Router$$".plus(info.clazz.substringAfterLast('.'))
         val routerClassSpec = createClassSpec(routerFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
         val createFileSpec = createFileSpec(routerFileName, Constant.GENERATE_ROUTER_ROUTES_PKG)
-        routerClassSpec.addSpecProperty("params", CollectionsTypeNames.List.parameterizedBy(RouterTypeNames.RouterParamInfo), null, false, CodeBlock.builder().apply {
-            if (info.params.isEmpty()) {
-                add("listOf()")
-            } else {
-                add("listOf(")
-                info.params.forEach { add("\nInjectParams(\n\tname = \"${it.name}\", \n\tfieldName = \"${it.fieldName}\", \n\ttype = ${it.type}),\n") }
-                add(")")
+        routerClassSpec.addSuperinterface(AutowiredService).addFunction(FunSpec.builder("inject").addParameter(ParameterSpec.builder("thiz", KotlinTypeNames.Any).build()).apply {
+            if (info.params.isNotEmpty()) {
+                addStatement("(thiz as ${info.clazz}).apply{")
+                val extras = if (info.routerMeta.routeType == RouteType.FRAGMENT) "arguments" else "intent.extras"
+                info.params.forEach {
+                    if (it.autowiredType == "getObject") {
+                        addStatement("val serializationService = Router.getInstance(SerializationService::class.java)")
+                        addStatement("this.${it.name} = serializationService?.fromJson<${it.type}>($extras?.getString(\"${it.name}\") ?: \"\",${it.type}::class.java )")
+
+                    } else {
+                        addStatement("this.${it.name} = $extras?.${it.autowiredType}(\"${it.name}\")?:${it.name}")
+                    }
+                }
+                addStatement("}")
             }
-        }.build())
-        if (info.pkg.isNotEmpty()) {
-            for (className in info.pkg) {
-                createFileSpec.addImport(className.packageName, className.simpleName)
-                KSPLog.print("packageName:===>$className")
-            }
-        }
+        }.addModifiers(KModifier.OVERRIDE).build())
+
+        //import package
+        if (info.pkg.isNotEmpty()) for (className in info.pkg) createFileSpec.addImport(className.packageName, className.simpleName)
 
         createFileSpec.buildAndWrite(routerClassSpec.build(), info.containingFile!!, codeGenerator)
     }
 
-    private fun IPoetFactory.generatePath(path: String, info: RouterInfo) {
+    private fun IPoetFactory.generatePath(path : String, info : RouterInfo) {
         val pathFileName = "Path$$".plus(path.reRouterName())
         val classPkg = info.clazz.substringBeforeLast('.')
         val simpleName = info.clazz.substringAfterLast('.')
@@ -130,7 +137,7 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
 }
 
 class RouterProcessorProvider : SymbolProcessorProvider {
-    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
+    override fun create(environment : SymbolProcessorEnvironment) : SymbolProcessor {
         val enableLog = environment.options["enableRouterLog"]?.toBoolean() ?: false
         if (enableLog) KSPLog.init(environment.logger)
         return RouterProcessor(environment.codeGenerator, PoetFactory())

@@ -234,19 +234,6 @@ abstract class Sorter : ICourier {
         pack.clear()
     }
 
-    /**
-     * 判断 Bundle 是否为 ActivityOptionsCompat 生成的动画 Bundle
-     */
-    private fun isAnimationBundle(bundle: Bundle?): Boolean {
-        if (bundle == null || bundle.isEmpty) return false
-
-        // 检查动画 Bundle 特有的键
-        val hasTransitionName = bundle.containsKey("android:activity.transitionCompleteListener")
-        val hasWindowAnimations = bundle.containsKey("android:activity.sharedElementNames")
-        val hasActivityAnimations = bundle.containsKey("android:activity.animType")
-
-        return hasTransitionName || hasWindowAnimations || hasActivityAnimations
-    }
 
     companion object {
         internal var logger: ILogger = DefaultLogger()

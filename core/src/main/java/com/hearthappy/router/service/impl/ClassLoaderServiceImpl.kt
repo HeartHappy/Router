@@ -1,6 +1,5 @@
 package com.hearthappy.router.service.impl
 
-import android.app.Activity
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray

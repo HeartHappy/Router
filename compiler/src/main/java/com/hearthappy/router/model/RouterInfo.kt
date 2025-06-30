@@ -10,6 +10,5 @@ class RouterInfo {
     var containingFile: KSFile? = null
     val params: MutableList<ParamsInfo> = mutableListOf()
     var routerMeta: RouteMeta by Delegates.notNull()
-    var pkg:Set<ClassName> = emptySet()
-//    var superType: TypeName? = null
+    var pkg:MutableSet<ClassName> = mutableSetOf()
 }

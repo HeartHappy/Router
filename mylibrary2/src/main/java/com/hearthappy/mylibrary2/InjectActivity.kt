@@ -7,7 +7,6 @@ import androidx.core.util.size
 import com.hearthappy.basic.AbsBaseActivity
 import com.hearthappy.common_api.HelloService
 import com.hearthappy.common_api.RouterPath
-import com.hearthappy.common_api.model.ParcelableBean
 import com.hearthappy.common_api.model.UserBean
 import com.hearthappy.mylibrary2.databinding.ActivityInjectBinding
 import com.hearthappy.router.annotations.Autowired
@@ -127,14 +126,13 @@ import java.io.Serializable
     override fun ActivityInjectBinding.initView() {
         Router.inject(this@InjectActivity)
         setTitle("modules2: InjectActivity")
-        tvTitle.text=String.format("title: %s\n${helloService?.sayHello("KSP Router")}",routeKey)
+        tvTitle.text=String.format("title: %s\nProviderService: %s",routeKey,helloService?.sayHello("KSP Router"))
     }
 
     override fun ActivityInjectBinding.initViewModelListener() {
     }
 
-    //SparseArray<out Parcelable>.joinToString(",")
-    fun SparseArray<out Parcelable>.joinToString(split : String) : String {
+    private fun SparseArray<out Parcelable>.joinToString(split : String) : String {
         val builder = StringBuilder()
         for (i in 0 until size) {
             builder.append(get(keyAt(i)).toString())

@@ -1,5 +1,6 @@
 package com.hearthappy.router.visitor
 
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
 import com.hearthappy.router.annotations.Autowired
@@ -37,15 +38,27 @@ class RouterVisitor(private val routes : MutableMap<String, RouterInfo>) : KSVis
                     val name = annotation.arguments.firstOrNull { it.name?.asString() == "name" }?.value as? String
                     val fieldName = property.simpleName.asString()
                     val paramName = name?.takeIf { it.isNotEmpty() }?.run { this } ?: fieldName
-                    val qualifiedName = property.type.resolve().declaration.qualifiedName?.asString()
+                    val resolve = property.type.resolve()
+                    val declaration = resolve.declaration
+                    val qualifiedName = declaration.qualifiedName?.asString()
                     val autowiredParam = if (DataInspector.isCollectionType(qualifiedName.toString())) {
                         CollectionsTypeNames.ArrayList
                     } else {
-                        property.type.resolve().toClassName()
+                        resolve.toClassName()
                     }
-                    val isImport = !autowiredParam.packageName.contains("kotlin") //如果不是基本类型就需要导包
-                    val bundleMethod = DataInspector.getBundleMethod(property.type)
-                    val injectParams = ParamsInfo(name = paramName, fieldName = fieldName, type = autowiredParam, autowiredType = DataInspector.getBundleMethod(property.type))
+                    val isImport = autowiredParam.packageName!="kotlin" //如果不是基本类型就需要导包
+                    val bundleMethod = DataInspector.getBundleMethod(resolve)
+                    val isSystem = DataInspector.isSystem(autowiredParam)
+                    val injectParams = if(declaration is KSClassDeclaration){
+                        val directParent = declaration.superTypes
+                            .mapNotNull { it.resolve().declaration as? KSClassDeclaration }
+                            .firstOrNull { it.classKind == ClassKind.CLASS ||it.classKind== ClassKind.INTERFACE }
+                            ?.toClassName()
+                        ParamsInfo(name = paramName, fieldName = fieldName, type = autowiredParam, autowiredType = DataInspector.getBundleMethod(resolve),directParent, isSystemPkg = isSystem)
+                    }else{
+                        ParamsInfo(name = paramName, fieldName = fieldName, type = autowiredParam, autowiredType = DataInspector.getBundleMethod(resolve), isSystemPkg = isSystem)
+                    }
+
                     routerInfo.params.add(injectParams)
                     if (isImport) {
                         needImport.add(autowiredParam)

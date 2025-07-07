@@ -23,28 +23,28 @@ object Router {
     internal fun init(context: Context) {
         _courier.appInit(context)
     }
-
+    @JvmStatic
     fun <T> getInstance(instance: Class<T>): T? {
         return _courier.getInstance(instance)
     }
-
+    @JvmStatic
     fun openLog() {
         _courier.showLog(true)
     }
-
+    @JvmStatic
     fun setLogger(logger: ILogger){
         _courier.setLogger(logger)
     }
 
+    @JvmStatic
     fun build(path: String): ICourier {
         return _courier.build(path)
     }
-
+    @JvmStatic
     fun build(uri: Uri): ICourier {
         return _courier.build(uri)
     }
-
-    // 参数注入
+    @JvmStatic
     fun inject(thiz: Any) {
         _courier.inject(thiz)
     }

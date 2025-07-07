@@ -2,9 +2,8 @@ package com.hearthappy.router.logger
 
 import android.text.TextUtils
 import android.util.Log
-import com.hearthappy.router.core.BuildConfig
-import com.hearthappy.router.launcher.Router
 import com.hearthappy.router.core.ILogger
+import com.hearthappy.router.launcher.Router
 
 class DefaultLogger : ILogger {
     private var isShowLog: Boolean = false
@@ -23,70 +22,70 @@ class DefaultLogger : ILogger {
     }
 
     override fun debug(message: String?) {
-        if (BuildConfig.DEBUG && isShowLog) {
+        if (isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.d(defaultTag, message + getExtInfo(stackTraceElement))
         }
     }
 
     override fun debug(tag: String?, message: String?) {
-        if (BuildConfig.DEBUG && isShowLog) {
+        if (isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.d(if (TextUtils.isEmpty(tag)) defaultTag else tag, message + getExtInfo(stackTraceElement))
         }
     }
 
     override fun info(message: String?) {
-        if (BuildConfig.DEBUG && isShowLog) {
+        if (isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.i(defaultTag, message + getExtInfo(stackTraceElement))
         }
     }
 
     override fun info(tag: String?, message: String?) {
-        if (BuildConfig.DEBUG && isShowLog) {
+        if (isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.i(if (TextUtils.isEmpty(tag)) defaultTag else tag, message + getExtInfo(stackTraceElement))
         }
     }
 
     override fun warning(message: String?) {
-        if (BuildConfig.DEBUG && isShowLog) {
+        if (isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.w(defaultTag, message + getExtInfo(stackTraceElement))
         }
     }
 
     override fun warning(tag: String?, message: String?) {
-        if (BuildConfig.DEBUG && isShowLog) {
+        if (isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.w(if (TextUtils.isEmpty(tag)) defaultTag else tag, message + getExtInfo(stackTraceElement))
         }
     }
 
     override fun error(message: String?) {
-        if (BuildConfig.DEBUG && isShowLog) {
+        if (isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.e(defaultTag, message + getExtInfo(stackTraceElement))
         }
     }
 
     override fun error(tag: String?, message: String?) {
-        if (BuildConfig.DEBUG && isShowLog) {
+        if (isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.e(if (TextUtils.isEmpty(tag)) defaultTag else tag, message + getExtInfo(stackTraceElement))
         }
     }
 
     override fun error(tag: String?, message: String?, throwable: Throwable?) {
-        if (BuildConfig.DEBUG && isShowLog) {
+        if (isShowLog) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.e(if (TextUtils.isEmpty(tag)) defaultTag else tag, message + getExtInfo(stackTraceElement))
         }
     }
 
     override fun monitor(message: String?) {
-        if (BuildConfig.DEBUG && isShowLog && isMonitorMode()) {
+        if (isShowLog && isMonitorMode()) {
             val stackTraceElement = Thread.currentThread().stackTrace[3]
             Log.d("$defaultTag::monitor", message + getExtInfo(stackTraceElement))
         }

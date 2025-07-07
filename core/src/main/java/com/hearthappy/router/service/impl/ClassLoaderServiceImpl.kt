@@ -9,6 +9,7 @@ import com.hearthappy.router.ext.routeRenaming
 import com.hearthappy.router.launcher.Sorter
 import com.hearthappy.router.launcher.Sorter.Companion.GENERATE_ROUTER_ACTIVITY_PKG
 import com.hearthappy.router.launcher.Sorter.Companion.GENERATE_ROUTER_PROVIDER_PKG
+import com.hearthappy.router.launcher.Sorter.Companion.logger
 import com.hearthappy.router.service.ClassLoaderService
 import com.hearthappy.router.service.PathReplaceService
 import com.hearthappy.router.service.SerializationService
@@ -70,7 +71,7 @@ class ClassLoaderServiceImpl : ClassLoaderService {
             inject.isAccessible=true
             inject.invoke(newInstance, thiz)
         } catch (e : ClassNotFoundException) {
-            throw HandlerException("No relevant routes found for ['$thiz']")
+            logger.info("No relevant routes found for ['$thiz']")
         }
     }
 }

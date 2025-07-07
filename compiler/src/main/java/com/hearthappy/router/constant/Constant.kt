@@ -23,10 +23,4 @@ object Constant {
 
     //转义符
     internal const val INDENTATION = "\t"
-
-    internal const val ROUTER_TYPE_ACTIVITY = "RouteType.ACTIVITY"
-    internal const val ROUTER_TYPE_SERVICE_PROVIDER = "RouteType.SERVICE_PROVIDER"
-    internal const val ROUTER_TYPE_SERVICE = "RouteType.SERVICE"
-    internal const val ROUTER_TYPE_FRAGMENT = "RouteType.FRAGMENT"
-    internal const val ROUTER_TYPE_BROADCAST = "RouteType.BROADCAST"
 }

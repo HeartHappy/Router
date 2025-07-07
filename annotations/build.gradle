@@ -1,8 +1,95 @@
 plugins {
     id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
+    id 'maven-publish'
+    id 'signing'
+}
+def publishVersion = rootProject.ext.publishVersion
+
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier.set("javadoc")
+    from javadoc.destinationDir
 }
 
+// 配置 Javadoc 任务（解决编码、依赖问题）
+tasks.named('javadoc') {
+    source = sourceSets.main.allJava
+    classpath += configurations.compileClasspath
+    options {
+        encoding 'UTF-8'
+        links 'https://docs.oracle.com/javase/8/docs/api/'
+        links 'https://kotlinlang.org/api/latest/jvm/stdlib/'
+    }
+}
+
+// 生成源代码 JAR
+tasks.register('sourceJar', Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier.set("sources")
+}
+tasks.register('zipRepo', Zip) {
+    from "$buildDir/repo"
+    archiveFileName = 'io.zip' //
+    destinationDirectory = file(buildDir)
+}
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = 'io.github.hearthappy'
+                artifactId = 'router-annotations'
+                version = publishVersion
+                artifact javadocJar
+                artifact sourceJar
+                from components.java
+
+                pom {
+                    name = 'router-annotations'
+                    description = 'Router Annotation Library'
+                    url = 'https://github.com/HeartHappy/ViewModelAutomationX'
+
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'HeartHappy'
+                            name = 'এ᭄白ຼ龙້໌ᮨꦿ'
+                            email = '1096885636@qq.com'
+                        }
+                    }
+
+                    scm {
+                        connection = 'scm:git://github.com/HeartHappy/Router'
+                        developerConnection = 'scm:git:ssh://github.com/HeartHappy/Router'
+                        url = 'https://github.com/HeartHappy/Router'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                url = uri("${buildDir}/repo") // 本地仓库路径
+            }
+        }
+    }
+    signing {
+        //gpg签名认证
+        sign(publishing.publications.maven)
+    }
+    // 使用 doLast 延迟配置依赖关系
+    // 直接使用字符串指定任务名称（确保名称正确）
+    tasks.named('zipRepo') { dependsOn 'publishMavenPublicationToMavenRepository' }
+
+    tasks.named('publishMavenPublicationToMavenRepository') {
+        finalizedBy tasks.named('zipRepo')
+    }
+}
 java {
     sourceCompatibility = rootProject.ext.javaVersion
     targetCompatibility = rootProject.ext.javaVersion

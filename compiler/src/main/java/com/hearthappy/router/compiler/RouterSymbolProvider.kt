@@ -111,19 +111,21 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
                 val extras = if (info.routerMeta.routeType == RouteType.FRAGMENT) "arguments" else "intent.extras"
                 addStatement("%L%L?.apply{",Constant.INDENTATION,extras)
                 info.params.forEach {
+                    val type = it.type.toString()
                     if (!it.isSystemPkg && it.autowiredParent?.simpleName == "Any") {
                         val serializationService="serializationService"
                         val errorMessage="The '${it.name}' field in the '${it.type.simpleName}' class needs to implement SerializationService to support automatic object injection"
+                        val throwMessage= "The 'withObject' field with the lateinit or Delegates modifier cannot be empty"
                         routerClassSpec.addSpecProperty(serializationService, SerializationService.copy(nullable = true), isDelegate = true, receiver = null, delegate = CodeBlock.of("lazy{ Router.getInstance(SerializationService::class.java)}"), modifiers = arrayOf(KModifier.PRIVATE))
                         addStatement("%L%L%L?.let {",Constant.INDENTATION,Constant.INDENTATION,serializationService)
-                        addStatement("%L%L%L%L = it.fromJson(getString(\"%L\") ,%L::class.java)",Constant.INDENTATION,Constant.INDENTATION,Constant.INDENTATION,it.name,it.name,it.type.simpleName)
+                        addStatement("%L%L%L%L = it.fromJson(getString(\"%L\") ,%L::class.java)${if (it.isLateinit)"?:throw RuntimeException(%S)" else "%L" }",Constant.INDENTATION,Constant.INDENTATION,Constant.INDENTATION,it.name,it.name,it.type.simpleName,if(it.isLateinit) throwMessage else "")
                         addStatement("%L%L}?:Log.e(\"Router\",%S)",Constant.INDENTATION,Constant.INDENTATION,errorMessage)
                         info.pkg.add(AndroidTypeNames.Log)
                     } else if (!it.isSystemPkg && it.autowiredParent == ProviderService) {
                         addStatement("%L%L${it.name} = Router.getInstance(${it.type.simpleName}::class.java)",Constant.INDENTATION,Constant.INDENTATION)
                     } else {
-                        if(it.type.toString() in DataInspector.primitiveTypes){
-                            addStatement("%L%L%L = %L(\"%L\",%L)",Constant.INDENTATION,Constant.INDENTATION,it.name,it.autowiredType,it.name,it.name)
+                        if(type in DataInspector.primitiveTypes){
+                            addStatement("%L%L%L = %L(\"%L\",%L)",Constant.INDENTATION,Constant.INDENTATION,it.name,it.autowiredType,it.name,if(it.isLateinit)DataInspector.toDefaultValue(type) else it.name)
                         }else{
                             addStatement("%L%L${it.name} = ${it.autowiredType}(\"${it.name}\")",Constant.INDENTATION,Constant.INDENTATION)
                         }

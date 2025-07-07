@@ -2,7 +2,9 @@ package com.hearthappy.router.visitor
 
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
+import com.google.devtools.ksp.symbol.Modifier
 import com.hearthappy.router.annotations.Autowired
 import com.hearthappy.router.annotations.Route
 import com.hearthappy.router.datahandler.DataInspector
@@ -49,14 +51,15 @@ class RouterVisitor(private val routes : MutableMap<String, RouterInfo>) : KSVis
                     val isImport = autowiredParam.packageName!="kotlin" //如果不是基本类型就需要导包
                     val bundleMethod = DataInspector.getBundleMethod(resolve)
                     val isSystem = DataInspector.isSystem(autowiredParam)
+                    val isLateInit = isLateinit(property)
                     val injectParams = if(declaration is KSClassDeclaration){
                         val directParent = declaration.superTypes
                             .mapNotNull { it.resolve().declaration as? KSClassDeclaration }
                             .firstOrNull { it.classKind == ClassKind.CLASS ||it.classKind== ClassKind.INTERFACE }
                             ?.toClassName()
-                        ParamsInfo(name = paramName, fieldName = fieldName, type = autowiredParam, autowiredType = DataInspector.getBundleMethod(resolve),directParent, isSystemPkg = isSystem)
+                        ParamsInfo(name = paramName, fieldName = fieldName, type = autowiredParam, autowiredType = DataInspector.getBundleMethod(resolve),directParent, isSystemPkg = isSystem, isLateinit = isLateInit)
                     }else{
-                        ParamsInfo(name = paramName, fieldName = fieldName, type = autowiredParam, autowiredType = DataInspector.getBundleMethod(resolve), isSystemPkg = isSystem)
+                        ParamsInfo(name = paramName, fieldName = fieldName, type = autowiredParam, autowiredType = DataInspector.getBundleMethod(resolve), isSystemPkg = isSystem, isLateinit = isLateInit)
                     }
 
                     routerInfo.params.add(injectParams)
@@ -73,5 +76,10 @@ class RouterVisitor(private val routes : MutableMap<String, RouterInfo>) : KSVis
         }
         routerInfo.pkg = needImport
         routes[path] = routerInfo
+    }
+
+    // 检查属性是否为 lateinit
+    private fun isLateinit(property: KSPropertyDeclaration): Boolean {
+        return property.modifiers.contains(Modifier.LATEINIT) || property.isDelegated()
     }
 }

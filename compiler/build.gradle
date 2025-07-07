@@ -2,8 +2,94 @@ plugins {
     id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
     id 'com.google.devtools.ksp'
+    id 'maven-publish'
+    id 'signing'
+}
+def publishVersion = rootProject.ext.publishVersion
+// 生成 Javadoc JAR
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier.set("javadoc")
+    from javadoc.destinationDir
 }
 
+// 生成源代码 JAR
+tasks.register('sourceJar', Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier.set("sources")
+}
+
+// 配置 Javadoc 任务（解决编码、依赖问题）
+tasks.named('javadoc') {
+    source = sourceSets.main.allJava
+    classpath += configurations.compileClasspath
+    options {
+        encoding 'UTF-8'
+        links 'https://docs.oracle.com/javase/8/docs/api/'
+        links 'https://kotlinlang.org/api/latest/jvm/stdlib/'
+    }
+}
+tasks.register('zipRepo', Zip) {
+    from "$buildDir/repo"
+    archiveFileName = 'io.zip' //
+    destinationDirectory = file(buildDir)
+}
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = 'io.github.hearthappy'
+                artifactId = 'router-compiler'
+                version = publishVersion
+                artifact javadocJar
+                artifact sourceJar
+                from components.java
+                pom {
+                    name = 'router-compiler'
+                    description = 'Router compile-time symbol processing library'
+                    url = 'https://github.com/HeartHappy/Router'
+
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'HeartHappy'
+                            name = 'এ᭄白ຼ龙້໌ᮨꦿ'
+                            email = '1096885636@qq.com'
+                        }
+                    }
+
+                    scm {
+                        connection = 'scm:git://github.com/HeartHappy/Router'
+                        developerConnection = 'scm:git:ssh://github.com/HeartHappy/Router'
+                        url = 'https://github.com/HeartHappy/Router'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                url = uri("${buildDir}/repo") // 本地仓库路径
+            }
+        }
+
+    }
+    signing {
+        //gpg签名认证
+        sign(publishing.publications.maven)
+    }
+// 设置 zipRepo 任务依赖于发布任务
+    tasks.named('zipRepo') { dependsOn 'publishMavenPublicationToMavenRepository' }
+
+    tasks.named('publishMavenPublicationToMavenRepository') {
+        finalizedBy tasks.named('zipRepo')
+    }
+}
 java {
     sourceCompatibility = rootProject.ext.javaVersion
     targetCompatibility = rootProject.ext.javaVersion
@@ -17,5 +103,5 @@ dependencies {
     implementation libs.devtools.ksp
     implementation libs.kotlinpoet.ksp
 //    implementation 'com.squareup:kotlinpoet-ksp:1.12.0'
-    implementation project(':annotations')
+    implementation libs.router.annotations
 }

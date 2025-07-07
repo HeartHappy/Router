@@ -1,17 +1,97 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
-//    id 'maven-publish'
-//    id 'signing'
+    id 'maven-publish'
+    id 'signing'
+}
+def publishVersion=rootProject.ext.publishVersion
+// Notice: 2022/1/11 Android依赖发布函数库
+
+tasks.register('javadoc', Javadoc) {
+    source = android.sourceSets.main.java.sourceFiles
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
 
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier.set("javadoc")
+    from javadoc.destinationDir
+}
+
+tasks.register('sourceJar', Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier.set("sources")
+}
+tasks.register('zipRepo', Zip) {
+    from "$buildDir/repo"
+    archiveFileName = 'io.zip'
+    destinationDirectory = file(buildDir)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = 'io.github.hearthappy'
+                artifactId = 'router-core'
+                version = publishVersion
+                artifacts {
+                    archives(javadocJar)
+                    archives(sourceJar)
+                }
+                pom {
+                    name = 'router-core'
+                    description = 'Router Core library'
+                    url = 'https://github.com/HeartHappy/Router'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'HeartHappy'
+                            name = 'এ᭄白ຼ龙້໌ᮨꦿ'
+                            email = '1096885636@qq.com'
+                        }
+                    }
+
+                    scm {
+                        connection = 'scm:git://github.com/HeartHappy/Router'
+                        developerConnection = 'scm:git:ssh://github.com/HeartHappy/Router'
+                        url = 'https://github.com/HeartHappy/Router'
+                    }
+                }
+
+            }
+        }
+        repositories {
+            maven {
+                url = uri("${buildDir}/repo") // 本地仓库路径
+            }
+        }
+    }
+    signing {
+        //gpg签名认证
+        sign(publishing.publications.release)
+    }
+    // 设置 zipRepo 任务依赖于发布任务
+    tasks.named('zipRepo') { dependsOn(publishReleasePublicationToMavenRepository) }
+
+    // 确保发布任务完成后总是执行 zipRepo 任务，即使发布任务失败
+    tasks.named('publishReleasePublicationToMavenRepository') {
+        finalizedBy(tasks.named('zipRepo'))
+    }
+}
 android {
     namespace 'com.hearthappy.router.core'
     compileSdk  rootProject.ext.compileSdk
 
     defaultConfig {
         minSdk rootProject.ext.minSdk
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -35,7 +115,6 @@ dependencies {
 
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
-    implementation libs.material
     implementation(libs.androidx.startup.runtime)
-    api project(':annotations')
+    api libs.router.annotations
 }

@@ -154,7 +154,19 @@ object DataInspector {
     fun isSystem(className: ClassName):Boolean {
             return className.toString() in primitiveTypes || className.toString() in standardBundleTypes || className.toString() in arrayTypes || className.toString() in collectionTypes
     }
-
+    fun toDefaultValue(typeName: String): Any {
+        return when (typeName) {
+            "kotlin.Int" -> -1
+            "kotlin.Boolean" -> false
+            "kotlin.Short" -> (-1).toShort()
+            "kotlin.Long" -> -1L
+            "kotlin.Float" -> -1f
+            "kotlin.Double" -> -1.0
+            "kotlin.Char" -> '\u0000' // NULL字符
+            "kotlin.Byte" -> (-1).toByte()
+            else -> "\"\""//String,CharSequence
+        }
+    }
     // Define sets of standard types
     internal val primitiveTypes = setOf("kotlin.String", "kotlin.Int", "kotlin.Boolean", "kotlin.Short", "kotlin.Long", "kotlin.Float", "kotlin.Double", "kotlin.Char", "kotlin.Byte", "kotlin.CharSequence")
 

@@ -13,7 +13,6 @@ android {
         minSdk rootProject.ext.minSdk
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -39,7 +38,7 @@ ksp {
     arg("enableRouterLog", "true")  // 调试时开启
 }
 dependencies {
-
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
@@ -58,5 +57,8 @@ dependencies {
     implementation project(':mylibrary2')
     //router
     implementation project(':core')
-    ksp project(':compiler')
+//    ksp project(':compiler')
+
+//    implementation(libs.router.core)
+    ksp(libs.router.compiler)
 }

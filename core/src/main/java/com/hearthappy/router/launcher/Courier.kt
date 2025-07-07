@@ -2,11 +2,10 @@ package com.hearthappy.router.launcher
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.util.SparseArray
 import androidx.core.app.ActivityOptionsCompat
-import com.hearthappy.router.exception.HandlerException
 import com.hearthappy.router.core.ICourier
+import com.hearthappy.router.exception.HandlerException
 import com.hearthappy.router.service.SerializationService
 import java.io.Serializable
 
@@ -30,7 +29,7 @@ class Courier : Sorter() {
         return this
     }
 
-    override fun withObject(key: String, value: Any): ICourier {
+    override fun withObject(key: String, value: Any?): ICourier {
         serializationService?.let {
             pack.bundle.putString(key, it.toJson(value))
         } ?: run {
@@ -40,7 +39,7 @@ class Courier : Sorter() {
         return this
     }
 
-    override fun withString(key: String, value: String): ICourier {
+    override fun withString(key: String, value: String?): ICourier {
         pack.bundle.putString(key, value)
         return this
     }
@@ -85,98 +84,98 @@ class Courier : Sorter() {
         return this
     }
 
-    override fun withCharSequence(key: String, value: CharSequence): ICourier {
+    override fun withCharSequence(key: String, value: CharSequence?): ICourier {
         pack.bundle.putCharSequence(key, value)
         return this
     }
 
-    override fun withParcelable(key: String, value: Parcelable): ICourier {
+    override fun withParcelable(key: String, value: Parcelable?): ICourier {
         pack.bundle.putParcelable(key, value)
         return this
     }
 
-    override fun withParcelableArray(key: String, value: Array<Parcelable>): ICourier {
+    override fun withParcelableArray(key: String, value: Array<Parcelable>?): ICourier {
         pack.bundle.putParcelableArray(key, value)
         return this
     }
 
 
-    override fun withParcelableArrayList(key: String, value: ArrayList<Parcelable>): ICourier {
+    override fun withParcelableArrayList(key: String, value: ArrayList<Parcelable>?): ICourier {
         pack.bundle.putParcelableArrayList(key, value)
         return this
     }
 
-    override fun withSparseParcelableArray(key: String, value: SparseArray<out Parcelable>): ICourier {
+    override fun withSparseParcelableArray(key: String, value: SparseArray<out Parcelable>?): ICourier {
         pack.bundle.putSparseParcelableArray(key, value)
         return this
     }
 
-    override fun withIntArrayList(key: String, value: ArrayList<Int>): ICourier {
+    override fun withIntArrayList(key: String, value: ArrayList<Int>?): ICourier {
         pack.bundle.putIntegerArrayList(key, value)
         return this
     }
 
-    override fun withStringArrayList(key: String, value: ArrayList<String>): ICourier {
+    override fun withStringArrayList(key: String, value: ArrayList<String>?): ICourier {
         pack.bundle.putStringArrayList(key, value)
         return this
     }
 
-    override fun withCharSequenceArrayList(key: String, value: ArrayList<CharSequence>): ICourier {
+    override fun withCharSequenceArrayList(key: String, value: ArrayList<CharSequence>?): ICourier {
         pack.bundle.putCharSequenceArrayList(key, value)
         return this
     }
 
-    override fun withSerializable(key: String, value: Serializable): ICourier {
+    override fun withSerializable(key: String, value: Serializable?): ICourier {
         pack.bundle.putSerializable(key, value)
         return this
     }
 
-    override fun withIntArray(key: String, value: IntArray): ICourier {
+    override fun withIntArray(key: String, value: IntArray?): ICourier {
         pack.bundle.putIntArray(key, value)
         return this
     }
 
-    override fun withByteArray(key: String, value: ByteArray): ICourier {
+    override fun withByteArray(key: String, value: ByteArray?): ICourier {
         pack.bundle.putByteArray(key, value)
         return this
     }
 
-    override fun withShortArray(key: String, value: ShortArray): ICourier {
+    override fun withShortArray(key: String, value: ShortArray?): ICourier {
         pack.bundle.putShortArray(key, value)
         return this
     }
 
-    override fun withCharArray(key: String, value: CharArray): ICourier {
+    override fun withCharArray(key: String, value: CharArray?): ICourier {
         pack.bundle.putCharArray(key, value)
         return this
     }
 
-    override fun withFloatArray(key: String, value: FloatArray): ICourier {
+    override fun withFloatArray(key: String, value: FloatArray?): ICourier {
         pack.bundle.putFloatArray(key, value)
         return this
     }
 
-    override fun withDoubleArray(key: String, value: DoubleArray): ICourier {
+    override fun withDoubleArray(key: String, value: DoubleArray?): ICourier {
         pack.bundle.putDoubleArray( key, value)
         return this
     }
 
-    override fun withBooleanArray(key: String, value: BooleanArray): ICourier {
+    override fun withBooleanArray(key: String, value: BooleanArray?): ICourier {
         pack.bundle.putBooleanArray(key, value)
         return this
     }
 
-    override fun withStringArray(key: String, value: Array<String>): ICourier {
+    override fun withStringArray(key: String, value: Array<String>?): ICourier {
         pack.bundle.putStringArray(key, value)
         return this
     }
 
-    override fun withLongArray(key: String, value: LongArray): ICourier {
+    override fun withLongArray(key: String, value: LongArray?): ICourier {
         pack.bundle.putLongArray(key, value)
         return this
     }
 
-    override fun withCharSequenceArray(key: String, value: Array<CharSequence>): ICourier {
+    override fun withCharSequenceArray(key: String, value: Array<CharSequence>?): ICourier {
         pack.bundle.putCharSequenceArray(key, value)
         return this
     }
@@ -186,14 +185,12 @@ class Courier : Sorter() {
         pack.exitAnim = exitAnim
         return this
     }
-
     override fun withOptionsCompat(compat: ActivityOptionsCompat): ICourier {
         pack.optionsCompat = compat.toBundle()
-        logger.debug("withOptionsCompat:$compat")
         return this
     }
 
-    override fun withBundle(key: String, bundle: Bundle): ICourier {
+    override fun withBundle(key: String, bundle: Bundle?): ICourier {
         pack.bundle.putBundle(key, bundle)
         return this
     }

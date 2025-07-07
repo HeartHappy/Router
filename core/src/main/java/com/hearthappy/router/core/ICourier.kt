@@ -17,9 +17,9 @@ interface ICourier : ISorter {
 
     fun withAction(action: String): ICourier
 
-    fun withObject(key: String, value: Any): ICourier
+    fun withObject(key: String, value: Any?): ICourier
 
-    fun withString(key: String, value: String): ICourier
+    fun withString(key: String, value: String?): ICourier
 
     fun withInt(key: String, value: Int): ICourier
 
@@ -37,48 +37,48 @@ interface ICourier : ISorter {
 
     fun withChar(key: String, value: Char): ICourier
 
-    fun withCharSequence(key: String, value: CharSequence): ICourier
+    fun withCharSequence(key: String, value: CharSequence?): ICourier
 
-    fun withParcelable(key: String, value: Parcelable): ICourier
+    fun withParcelable(key: String, value: Parcelable?): ICourier
 
-    fun withSerializable(key: String, value: Serializable): ICourier
+    fun withSerializable(key: String, value: Serializable?): ICourier
 
-    fun withBundle(key: String, bundle: Bundle): ICourier
+    fun withBundle(key: String, bundle: Bundle?): ICourier
 
 
     //Array
-    fun withIntArray(key: String, value: IntArray): ICourier
+    fun withIntArray(key: String, value: IntArray?): ICourier
 
-    fun withByteArray(key: String, value: ByteArray): ICourier
+    fun withByteArray(key: String, value: ByteArray?): ICourier
 
-    fun withShortArray(key: String, value: ShortArray): ICourier
+    fun withShortArray(key: String, value: ShortArray?): ICourier
 
-    fun withCharArray(key: String, value: CharArray): ICourier
+    fun withCharArray(key: String, value: CharArray?): ICourier
 
-    fun withFloatArray(key: String, value: FloatArray): ICourier
+    fun withFloatArray(key: String, value: FloatArray?): ICourier
 
-    fun withDoubleArray(key: String, value: DoubleArray): ICourier
+    fun withDoubleArray(key: String, value: DoubleArray?): ICourier
 
-    fun withBooleanArray(key: String, value: BooleanArray): ICourier
+    fun withBooleanArray(key: String, value: BooleanArray?): ICourier
 
-    fun withStringArray(key: String, value: Array<String>): ICourier
+    fun withStringArray(key: String, value: Array<String>?): ICourier
 
-    fun withLongArray(key: String, value: LongArray): ICourier
+    fun withLongArray(key: String, value: LongArray?): ICourier
 
-    fun withCharSequenceArray(key: String, value: Array<CharSequence>): ICourier
+    fun withCharSequenceArray(key: String, value: Array<CharSequence>?): ICourier
 
-    fun withParcelableArray(key: String, value: Array<Parcelable>): ICourier
+    fun withParcelableArray(key: String, value: Array<Parcelable>?): ICourier
 
     // ArrayList
-    fun withParcelableArrayList(key: String, value: ArrayList<Parcelable>): ICourier
+    fun withParcelableArrayList(key: String, value: ArrayList<Parcelable>?): ICourier
 
-    fun withSparseParcelableArray(key: String, value: SparseArray<out Parcelable>): ICourier
+    fun withSparseParcelableArray(key: String, value: SparseArray<out Parcelable>?): ICourier
 
-    fun withIntArrayList(key: String, value: ArrayList<Int>): ICourier
+    fun withIntArrayList(key: String, value: ArrayList<Int>?): ICourier
 
-    fun withStringArrayList(key: String, value: ArrayList<String>): ICourier
+    fun withStringArrayList(key: String, value: ArrayList<String>?): ICourier
 
-    fun withCharSequenceArrayList(key: String, value: ArrayList<CharSequence>): ICourier
+    fun withCharSequenceArrayList(key: String, value: ArrayList<CharSequence>?): ICourier
 
 
     //animator

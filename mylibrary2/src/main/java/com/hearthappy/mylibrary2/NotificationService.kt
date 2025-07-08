@@ -33,7 +33,7 @@ class NotificationService {
             val notificationChannel = NotificationChannel(
                 CHANNEL_ID,
                 "通知消息",
-                NotificationManager.IMPORTANCE_NONE
+                NotificationManager.IMPORTANCE_DEFAULT
             ) // 设置通知出现时的闪灯（如果 android 设备支持的话）
             notificationChannel.enableLights(true)
             notificationChannel.lightColor =

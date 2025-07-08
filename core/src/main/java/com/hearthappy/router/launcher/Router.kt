@@ -14,39 +14,40 @@ object Router {
     internal const val TAG = "Router"
 
 
-    private val _courier by lazy { Courier() }
-
+    private val _router by lazy { RouterEngine() }
+    internal fun getRouterEngine() = _router
 
     /**
      * initialize routing related services
      */
     internal fun init(context: Context) {
-        _courier.appInit(context)
-    }
-    @JvmStatic
-    fun <T> getInstance(instance: Class<T>): T? {
-        return _courier.getInstance(instance)
-    }
-    @JvmStatic
-    fun openLog() {
-        _courier.showLog(true)
-    }
-    @JvmStatic
-    fun setLogger(logger: ILogger){
-        _courier.setLogger(logger)
+        _router.init(context)
     }
 
-    @JvmStatic
-    fun build(path: String): ICourier {
-        return _courier.build(path)
+
+
+    @JvmStatic fun <T> getInstance(instance: Class<T>): T? {
+        return _router.getInstance(instance)
     }
-    @JvmStatic
-    fun build(uri: Uri): ICourier {
-        return _courier.build(uri)
+
+    @JvmStatic fun openLog() {
+        _router.showLog(true)
     }
-    @JvmStatic
-    fun inject(thiz: Any) {
-        _courier.inject(thiz)
+
+    @JvmStatic fun setLogger(logger: ILogger) {
+        _router.setLogger(logger)
+    }
+
+    @JvmStatic fun build(path: String): ICourier {
+        return _router.build(path)
+    }
+
+    @JvmStatic fun build(uri: Uri): ICourier {
+        return _router.build(uri)
+    }
+
+    @JvmStatic fun inject(thiz: Any) {
+        _router.inject(thiz)
     }
 
 

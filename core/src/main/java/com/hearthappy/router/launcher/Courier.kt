@@ -1,5 +1,6 @@
 package com.hearthappy.router.launcher
 
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray
@@ -17,8 +18,12 @@ import java.io.Serializable
  * Responsible for packaging related products and forwarding them to other related personnel.
  * He also provides other services, such as interception.
  */
-class Courier : Sorter() {
+class Courier(path: String, uri: Uri?) : Sorter() {
 
+    init {
+        setPath(path)
+        setUri(uri)
+    }
     override fun addFlags(flags: Int): ICourier {
         pack.flags = pack.flags or flags
         return this

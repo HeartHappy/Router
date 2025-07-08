@@ -15,9 +15,6 @@ import com.hearthappy.router.launcher.Router
     private lateinit var viewBinding: ActivityRouter2Binding
 
 
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityRouter2Binding.inflate(layoutInflater)
@@ -25,10 +22,14 @@ import com.hearthappy.router.launcher.Router
         setTitle("Modules2 : Modules2Activity")
         setContentView(viewBinding.root)
         viewBinding.apply {
+            //获取uri
+            val uri = intent.data
+            uri?.let {  tvTitle.text = uri.toString() }
             btnJump.setOnClickListener {
                 Router.build(RouterPath.MAIN_ACTIVITY).navigation()
             }
             btnJump1.setOnClickListener {
+
                 val result: String = tvTitle.text.toString()
                 val resultIntent = Intent()
                 resultIntent.putExtra("result", result)

@@ -24,5 +24,4 @@ interface ISorter {
 
     fun getInstance(): Any
 
-    fun <T> getInstance(instance: Class<T>): T?
 }

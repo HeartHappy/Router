@@ -11,7 +11,6 @@ import androidx.core.app.ActivityCompat
 import com.hearthappy.router.analysis.TargetObject
 import com.hearthappy.router.core.BuildConfig
 import com.hearthappy.router.core.ICourier
-import com.hearthappy.router.core.ILogger
 import com.hearthappy.router.core.ISorter
 import com.hearthappy.router.core.Pack
 import com.hearthappy.router.enums.RouteType
@@ -20,12 +19,7 @@ import com.hearthappy.router.ext.renaming
 import com.hearthappy.router.ext.toSmartBundle
 import com.hearthappy.router.interfaces.InterceptorCallback
 import com.hearthappy.router.interfaces.NavigationCallback
-import com.hearthappy.router.logger.DefaultLogger
-import com.hearthappy.router.service.ClassLoaderService
-import com.hearthappy.router.service.InterceptorService
-import com.hearthappy.router.service.PathReplaceService
 import com.hearthappy.router.service.SerializationService
-import com.hearthappy.router.service.impl.ClassLoaderServiceImpl
 import com.hearthappy.router.service.impl.InterceptorServiceImpl
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -37,32 +31,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 abstract class Sorter : ICourier {
     internal val pack: Pack by lazy { Pack() }
 
-    private val classLoaderService: ClassLoaderService by lazy { ClassLoaderServiceImpl() }
-    private val interceptorService: InterceptorService by lazy { InterceptorServiceImpl() }
+
     internal var serializationService: SerializationService? = null
 
-    private fun initInterceptorService() {
-        interceptorService.init(classLoaderService)
-    }
-
-    internal fun inject(thiz: Any) {
-        classLoaderService.inject(thiz)
-    }
-
-
-    internal fun appInit(context: Context) {
-        pack.appContext = context
-        initInterceptorService()
-    }
-
-
-    internal fun showLog(isShowLog: Boolean) {
-        logger.showLog(isShowLog)
-    }
-
-    internal fun setLogger(log: ILogger) {
-        logger = log
-    }
 
     private fun setContext(context: Context) {
         pack.context = context
@@ -71,9 +42,15 @@ abstract class Sorter : ICourier {
     fun getPath(): String {
         return pack.path
     }
+    fun setPath(path: String){
+        pack.path = path
+    }
+    fun setUri(uri: Uri?) {
+        pack.uri = uri
+    }
 
     fun getContext(): Context? {
-        return pack.context ?: pack.appContext
+        return pack.context ?: Router.getRouterEngine().appContext
     }
 
     internal fun getExtras(): Bundle {
@@ -85,24 +62,26 @@ abstract class Sorter : ICourier {
     }
 
 
-    private fun build(path: String?, uri: Uri?): ICourier {
-        path ?: throw HandlerException("Parameter cannot be empty!")
-        if (path.isEmpty() || path.isBlank()) throw HandlerException("Parameter is invalid!")
-        pack.path = path
-        pack.uri = uri
+    override fun greenChannel(): ISorter {
+        pack.greenChannel = true
         return this
     }
 
-    fun build(path: String): ICourier {
-        val pathReplaceService = Router.getInstance(PathReplaceService::class.java)
-        pathReplaceService?.let { build(pathReplaceService.forString(path), null) } ?: build(path, null)
-        return this
+    override fun getDestination(): Class<*> {
+        val targetObject = Router.getRouterEngine().classLoaderService.getAnnotation(TargetObject::class.java, GENERATE_ROUTER_PATH_PKG.plus(pack.path.renaming()))
+        return targetObject.name.java
     }
 
-    fun build(uri: Uri): ICourier {
-        val pathReplaceService = Router.getInstance(PathReplaceService::class.java)
-        pathReplaceService?.let { build(uri.path, pathReplaceService.forUri(uri)) } ?: build(uri.path, uri)
-        return this
+
+    private fun Pack.pendingTransition(currentContext: Activity) {
+        if ((-1 != enterAnim && -1 != exitAnim)) {
+            currentContext.overridePendingTransition(enterAnim, exitAnim)
+        }
+    }
+
+    override fun getInstance(): Any {
+        if (pack.path.isEmpty() || pack.path.isBlank()) throw HandlerException("Parameter is invalid!")
+        return Router.getRouterEngine().classLoaderService.getAnnotationClass(TargetObject::class.java, GENERATE_ROUTER_PATH_PKG.plus(pack.path.renaming()), this)
     }
 
 
@@ -120,13 +99,13 @@ abstract class Sorter : ICourier {
     }
 
     override fun navigation(context: Context?, requestCode: Int, callback: NavigationCallback?) {
-        val currentContext = context ?: pack.appContext ?: throw HandlerException("context is null")
+        val currentContext = context ?: Router.getRouterEngine().appContext ?: throw HandlerException("context is null")
         try {
-            val targetObject = classLoaderService.getAnnotation(TargetObject::class.java, GENERATE_ROUTER_PATH_PKG.plus(pack.path.renaming()))
+            val targetObject = Router.getRouterEngine().classLoaderService.getAnnotation(TargetObject::class.java, GENERATE_ROUTER_PATH_PKG.plus(pack.path.renaming()))
             setContext(currentContext)
             val shouldContinue = AtomicBoolean(true)
             callback?.onFound(this)
-            val records = interceptorService.getRouterInterceptors()
+            val records = Router.getRouterEngine().interceptorService.getRouterInterceptors()
             if (records.isNotEmpty() && !pack.isGreenChannel()) {
                 val isContinue = interceptionHandler(records, shouldContinue, callback)
                 if (isContinue) navigationForward(targetObject, currentContext, requestCode, callback)
@@ -136,16 +115,6 @@ abstract class Sorter : ICourier {
             if (BuildConfig.DEBUG) Toast.makeText(currentContext, "No route found for path ['${pack.path}']", Toast.LENGTH_SHORT).show()
             callback?.onLost(this)
         }
-    }
-
-    override fun greenChannel(): ISorter {
-        pack.greenChannel = true
-        return this
-    }
-
-    override fun getDestination(): Class<*> {
-        val targetObject = classLoaderService.getAnnotation(TargetObject::class.java, GENERATE_ROUTER_PATH_PKG.plus(pack.path.renaming()))
-        return targetObject.name.java
     }
 
 
@@ -161,7 +130,7 @@ abstract class Sorter : ICourier {
                 override fun onInterrupt(exception: Throwable?) {
                     callback?.onInterrupt(this@Sorter)
                     exception?.let {
-                        logger.debug("onInterrupt: ${exception.message}")
+                        Router.getRouterEngine().routerLogger.debug("onInterrupt: ${exception.message}")
                         shouldContinue.set(false)
                     }
                 }
@@ -215,28 +184,13 @@ abstract class Sorter : ICourier {
 
     }
 
-    private fun Pack.pendingTransition(currentContext: Activity) {
-        if ((-1 != enterAnim && -1 != exitAnim)) {
-            currentContext.overridePendingTransition(enterAnim, exitAnim)
-        }
-    }
-
-    override fun getInstance(): Any {
-        if (pack.path.isEmpty() || pack.path.isBlank()) throw HandlerException("Parameter is invalid!")
-        return classLoaderService.getAnnotationClass(TargetObject::class.java, GENERATE_ROUTER_PATH_PKG.plus(pack.path.renaming()), this)
-    }
-
-    override fun <T> getInstance(instance: Class<T>): T? {
-        return classLoaderService.getInstance(instance)
-    }
-
     private fun completed() {
         pack.clear()
     }
 
 
     companion object {
-        internal var logger: ILogger = DefaultLogger()
+
 
         //生成路径
         internal const val GENERATE_ROUTER_PATH_PKG = "com.hearthappy.router.generate.path."

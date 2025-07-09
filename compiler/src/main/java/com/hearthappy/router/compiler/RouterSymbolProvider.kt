@@ -34,6 +34,13 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.measureTimeMillis
 
 /**
@@ -44,12 +51,12 @@ import kotlin.system.measureTimeMillis
 class RouterProcessor(private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory) : SymbolProcessor {
 
     private val routes = mutableMapOf<String, RouterInfo>()
-
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val measureTimeMillis = measureTimeMillis {
             val routeSymbols = resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!)
-            val invalidSymbols = routeSymbols.filter { it.validate() }.toList()
-            if (invalidSymbols.isEmpty()) return emptyList()
+            val invalidSymbols = routeSymbols.filter { it.validate() }
+            if (invalidSymbols.count()==0) return emptyList()
+
             routeSymbols.filterIsInstance<KSClassDeclaration>().forEach { it.accept(RouterVisitor(routes), Unit) }
             generateRouterTable()
         }
@@ -59,8 +66,8 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
     }
 
     private fun generateRouterTable() {
-        routes.forEach { (path, info) ->
-            poetFactory.apply {
+        poetFactory.apply {
+            routes.forEach { (path, info) ->
                 KSPLog.print("path = $path , class = ${info.clazz} ")
                 when (info.routerMeta.routeType) {
                     RouteType.ACTIVITY, RouteType.FRAGMENT, RouteType.SERVICE -> {
@@ -109,30 +116,30 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
                 info.pkg.add(clazz)
                 addStatement("(thiz as ${clazz.simpleName}).apply{")
                 val extras = if (info.routerMeta.routeType == RouteType.FRAGMENT) "arguments" else "intent.extras"
-                addStatement("%L%L?.apply{",Constant.INDENTATION,extras)
+                addStatement("%L%L?.apply{", Constant.INDENTATION, extras)
                 info.params.forEach {
                     val type = it.type.toString()
                     if (!it.isSystemPkg && it.autowiredParent?.simpleName == "Any") {
-                        val serializationService="serializationService"
-                        val errorMessage="The '${it.name}' field in the '${it.type.simpleName}' class needs to implement SerializationService to support automatic object injection"
-                        val throwMessage= "The 'withObject' field with the lateinit or Delegates modifier cannot be empty"
+                        val serializationService = "serializationService"
+                        val errorMessage = "The '${it.name}' field in the '${it.type.simpleName}' class needs to implement SerializationService to support automatic object injection"
+                        val throwMessage = "The 'withObject' field with the lateinit or Delegates modifier cannot be empty"
                         routerClassSpec.addSpecProperty(serializationService, SerializationService.copy(nullable = true), isDelegate = true, receiver = null, delegate = CodeBlock.of("lazy{ Router.getInstance(SerializationService::class.java)}"), modifiers = arrayOf(KModifier.PRIVATE))
-                        addStatement("%L%L%L?.let {",Constant.INDENTATION,Constant.INDENTATION,serializationService)
-                        addStatement("%L%L%L%L = it.fromJson(getString(\"%L\") ,%L::class.java)${if (it.isLateinit)"?:throw RuntimeException(%S)" else "%L" }",Constant.INDENTATION,Constant.INDENTATION,Constant.INDENTATION,it.name,it.name,it.type.simpleName,if(it.isLateinit) throwMessage else "")
-                        addStatement("%L%L}?:Log.e(\"Router\",%S)",Constant.INDENTATION,Constant.INDENTATION,errorMessage)
+                        addStatement("%L%L%L?.let {", Constant.INDENTATION, Constant.INDENTATION, serializationService)
+                        addStatement("%L%L%L%L = it.fromJson(getString(\"%L\") ,%L::class.java)${if (it.isLateinit) "?:throw RuntimeException(%S)" else "%L"}", Constant.INDENTATION, Constant.INDENTATION, Constant.INDENTATION, it.name, it.name, it.type.simpleName, if (it.isLateinit) throwMessage else "")
+                        addStatement("%L%L}?:Log.e(\"Router\",%S)", Constant.INDENTATION, Constant.INDENTATION, errorMessage)
                         info.pkg.add(AndroidTypeNames.Log)
                     } else if (!it.isSystemPkg && it.autowiredParent == ProviderService) {
-                        addStatement("%L%L${it.name} = Router.getInstance(${it.type.simpleName}::class.java)",Constant.INDENTATION,Constant.INDENTATION)
+                        addStatement("%L%L${it.name} = Router.getInstance(${it.type.simpleName}::class.java)", Constant.INDENTATION, Constant.INDENTATION)
                     } else {
-                        if(type in DataInspector.primitiveTypes){
-                            addStatement("%L%L%L = %L(\"%L\",%L)",Constant.INDENTATION,Constant.INDENTATION,it.name,it.autowiredType,it.name,if(it.isLateinit)DataInspector.toDefaultValue(type) else it.name)
-                        }else{
-                            addStatement("%L%L${it.name} = ${it.autowiredType}(\"${it.name}\")",Constant.INDENTATION,Constant.INDENTATION)
+                        if (type in DataInspector.primitiveTypes) {
+                            addStatement("%L%L%L = %L(\"%L\",%L)", Constant.INDENTATION, Constant.INDENTATION, it.name, it.autowiredType, it.name, if (it.isLateinit) DataInspector.toDefaultValue(type) else it.name)
+                        } else {
+                            addStatement("%L%L${it.name} = ${it.autowiredType}(\"${it.name}\")", Constant.INDENTATION, Constant.INDENTATION)
                         }
 
                     }
                 }
-                addStatement("%L}",Constant.INDENTATION)
+                addStatement("%L}", Constant.INDENTATION)
                 addStatement("}")
             }
         }.addModifiers(KModifier.OVERRIDE).build())

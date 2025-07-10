@@ -37,10 +37,11 @@ import com.squareup.kotlinpoet.ParameterSpec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.measureTimeMillis
 
 /**
@@ -48,50 +49,84 @@ import kotlin.system.measureTimeMillis
  * @author ChenRui
  * ClassDescription： Parse and generate routing files
  */
-class RouterProcessor(private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory) : SymbolProcessor {
-
-    private val routes = mutableMapOf<String, RouterInfo>()
+class RouterProcessor(private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory) : SymbolProcessor { // 使用线程安全的集合存储路由信息
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val measureTimeMillis = measureTimeMillis {
-            val routeSymbols = resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!)
-            val invalidSymbols = routeSymbols.filter { it.validate() }
-            if (invalidSymbols.count()==0) return emptyList()
+        val routeSymbols = resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!)
+        val invalidSymbols = routeSymbols.filter { it.validate() }.toList()
+        if (invalidSymbols.isEmpty()) return emptyList()
 
-            routeSymbols.filterIsInstance<KSClassDeclaration>().forEach { it.accept(RouterVisitor(routes), Unit) }
-            generateRouterTable()
+        val declarationSequence = routeSymbols.filterIsInstance<KSClassDeclaration>()
+        val took = measureTimeMillis {
+            runBlocking {
+                val routeChannel = Channel<RouterInfo>(Channel.UNLIMITED)
+
+                val producer = producerJob(routeChannel, declarationSequence)
+
+                val consumer = consumerJob(routeChannel, declarationSequence.count())
+
+                joinAll(producer, consumer)
+            }
         }
-        KSPLog.printRouterTook(routes.size, measureTimeMillis)
-        routes.clear()
+        KSPLog.printRouterTook(declarationSequence.count(), took)
         return emptyList()
     }
 
-    private fun generateRouterTable() {
-        poetFactory.apply {
-            routes.forEach { (path, info) ->
-                KSPLog.print("path = $path , class = ${info.clazz} ")
-                when (info.routerMeta.routeType) {
-                    RouteType.ACTIVITY, RouteType.FRAGMENT, RouteType.SERVICE -> {
-                        generatePath(path, info)
-                        generateRouter(info)
-                    }
-
-                    RouteType.SERVICE_PROVIDER -> {
-                        generateProvider(path, info)
-                    }
-
-                    else -> {}
-                }
+    /**
+     * 消费者协程：路由文件的生成
+     * @receiver CoroutineScope
+     * @param routeChannel Channel<RouterInfo>
+     * @param totalCount Int
+     * @return Job
+     */
+    private fun CoroutineScope.consumerJob(routeChannel: Channel<RouterInfo>, totalCount: Int): Job {
+        return launch(Dispatchers.IO) {
+            var count = 0
+            routeChannel.consumeEach {
+                generateRouterTable(it)
+                if (++count == totalCount) routeChannel.close()
             }
         }
     }
 
-    private fun IPoetFactory.generateProvider(path: String, info: RouterInfo) {
+    /**
+     * 生产者协程：符号解析
+     * @receiver CoroutineScope
+     * @param routeChannel Channel<RouterInfo>
+     * @param declarationSequence Sequence<KSClassDeclaration>
+     * @return Job
+     */
+    private fun CoroutineScope.producerJob(routeChannel: Channel<RouterInfo>, declarationSequence: Sequence<KSClassDeclaration>): Job {
+        return launch(Dispatchers.Default) {
+            declarationSequence.forEach { it.accept(RouterVisitor(routeChannel, this), Unit) }
+        }
+    }
+
+
+    private fun generateRouterTable(info: RouterInfo) {
+        poetFactory.apply {
+            KSPLog.print("path = ${info.path} , class = ${info.clazz} ")
+            when (info.routerMeta.routeType) {
+                RouteType.ACTIVITY, RouteType.FRAGMENT, RouteType.SERVICE -> {
+                    generatePath(info)
+                    generateRouter(info)
+                }
+
+                RouteType.SERVICE_PROVIDER -> {
+                    generateProvider(info)
+                }
+
+                else -> Unit
+            }
+        }
+    }
+
+    private fun IPoetFactory.generateProvider(info: RouterInfo) {
         val providerFileName = info.routerMeta.superClass.run {
             when (this) {
                 SerializationService -> "Provider$$".plus("Json")
                 PathReplaceService -> "Provider$$".plus("PathReplace")
                 ProviderService -> {
-                    generatePath(path, info)
+                    generatePath(info)
                     "Provider$$".plus(info.routerMeta.parent?.simpleName)
                 }
                 else -> EMPTY_STRING
@@ -150,8 +185,8 @@ class RouterProcessor(private val codeGenerator: CodeGenerator, private val poet
         createFileSpec.buildAndWrite(routerClassSpec.build(), info.containingFile!!, codeGenerator)
     }
 
-    private fun IPoetFactory.generatePath(path: String, info: RouterInfo) {
-        val pathFileName = "Path$$".plus(path.reRouterName())
+    private fun IPoetFactory.generatePath(info: RouterInfo) {
+        val pathFileName = "Path$$".plus(info.path.reRouterName())
         val classPkg = info.clazz.substringBeforeLast('.')
         val simpleName = info.clazz.substringAfterLast('.')
         val pathClassSpec = createClassSpec(pathFileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)

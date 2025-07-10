@@ -7,6 +7,7 @@ import kotlin.properties.Delegates
 
 class RouterInfo {
     var clazz: String = ""
+    var path:String=""
     var containingFile: KSFile? = null
     val params: MutableList<ParamsInfo> = mutableListOf()
     var routerMeta: RouteMeta by Delegates.notNull()

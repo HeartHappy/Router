@@ -37,15 +37,14 @@ class RouterVisitor(private val channel: Channel<RouterInfo>, private val corout
         routerInfo.clazz = className
         routerInfo.containingFile = classDeclaration.containingFile
         routerInfo.routerMeta = classDeclaration.convertType()
-        val needImport = mutableSetOf<ClassName>() //优化：过滤不需要的属性
+        val needImport = mutableSetOf<ClassName>()
         classDeclaration.getAllProperties().filter { prop ->
             prop.annotations.any { ann -> (ann.annotationType.resolve().declaration as? KSClassDeclaration)?.qualifiedName?.asString() == Autowired::class.qualifiedName }
         }.forEach { property ->
-
-            property.annotations.forEach { annotation ->
-                val name = annotation.arguments.firstOrNull { it.name?.asString() == "name" }?.value as? String
+            property.annotations.forEach {autowired->
+                val name = autowired.arguments.firstOrNull { it.name?.asString() == "name" }?.value as? String
                 val fieldName = property.simpleName.asString()
-                val paramName = name?.takeIf { it.isNotEmpty() }?.run { this } ?: fieldName
+                val paramName = name?.ifEmpty { fieldName }?:fieldName
                 val resolve = property.type.resolve()
                 val declaration = resolve.declaration
                 val qualifiedName = declaration.qualifiedName?.asString() ?: ""
@@ -73,7 +72,6 @@ class RouterVisitor(private val channel: Channel<RouterInfo>, private val corout
                     }
                 }
             }
-
         }
         routerInfo.pkg = needImport
         coroutineScope.launch { channel.send(routerInfo) }

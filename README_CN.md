@@ -308,7 +308,7 @@ val sayHello1 = helloService1.sayHello("KSP Router")
 val helloService2 = Router.getInstance(HelloService::class.java)
 val sayHello2 = helloService2.sayHello("KSP Router")
 ```
-#### 五、处理跳转结果
+#### 5、处理跳转结果
 
 ```kotlin
 //新版api
@@ -342,3 +342,34 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
     }  
 })
 ```
+
+### 六、ARouter 迁移到 Router
+
+#### 一、按下快捷键ctrl+shift+R，搜索 xxx 并替换为 yyy ,然后点击 Replace All
+##### 1、包路径替换表
+| ARouter代码 (原) | Router代码 (替换后) |
+|------------------|---------------------|
+| `com.alibaba.android.arouter.facade.annotation.Route` | `com.hearthappy.router.annotations.Route` |
+| `com.alibaba.android.arouter.facade.annotation.Interceptor` | `com.hearthappy.router.annotations.Interceptor` |
+| `com.alibaba.android.arouter.facade.annotation.Autowired` | `com.hearthappy.router.annotations.Autowired` |
+| `com.alibaba.android.arouter.facade.template.IProvider` | `com.hearthappy.router.service.ProviderService` |
+| `com.alibaba.android.arouter.facade.service.PathReplaceService` | `com.hearthappy.router.service.PathReplaceService` |
+| `com.alibaba.android.arouter.facade.service.SerializationService` | `com.hearthappy.router.service.SerializationService` |
+| `com.alibaba.android.arouter.facade.Postcard` | `com.hearthappy.router.launcher.Sorter` |
+| `com.alibaba.android.arouter.facade.callback.InterceptorCallback` | `com.hearthappy.router.interfaces.InterceptorCallback` |
+| `com.alibaba.android.arouter.facade.template.IInterceptor` | `com.hearthappy.router.interfaces.IInterceptor` |
+
+##### 2、类名替换表
+| ARouter代码 (原) | Router代码 (替换后) |
+|------------------|---------------------|
+| `Postcard` | `Sorter` |
+
+##### 3、使用方法替换示例
+| ARouter代码 (原) | Router代码 (替换后) |
+|------------------|---------------------|
+| `ARouter.getInstance()` | `Router` |
+
+
+
+
+#### 二、实例化相关替换为Router.getInstance(xxx) 或 Router.build("path").getInstance() as (Your class) 

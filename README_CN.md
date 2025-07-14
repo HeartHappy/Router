@@ -196,10 +196,10 @@ class MyApp : Application() {
     }  
 }
 ```
-//build.gradle
+添加到build.gradle文件中
 ```groovy
 ksp {  
-    arg("enableRouterLog", "true")  //编译时日志 
+    arg("enableRouterLog", "true")  //编译时日志 ，默认关闭
 }
 ```
 #### 7、添加混淆规则

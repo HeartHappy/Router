@@ -8,7 +8,7 @@ import com.hearthappy.router.launcher.Router
 abstract class BaseActivity<VB:ViewBinding>:AbsBaseActivity<VB>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Router.inject(this)
         super.onCreate(savedInstanceState)
+        Router.inject(this)
     }
 }

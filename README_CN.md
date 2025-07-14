@@ -1,6 +1,5 @@
 # KSP Router
-
-[english](https://github.com/HeartHappy/Router/blob/master/READMD.md "english")
+[english](https://github.com/HeartHappy/Router/blob/master/README.md "english")
 
 ### 一、简介：
 使用KSP技术实现路由相关功能，主要提升编译性能，和解决ARouter与KSP兼容问题，本项目的功能主要参考阿里的ARouter。希望Router能在项目中给大家带来更好的体验

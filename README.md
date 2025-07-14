@@ -27,12 +27,12 @@ plugins{
 ```
 #### 2. Add remote dependencies and ksp plugins to the build.gradle (app) file
 ```
-//ksp插件
+//ksp plugin
 plugins {
     id 'com.google.devtools.ksp'
 }
 android{
-    //JAVA和jvm设置为11或更高
+    //JAVA and jvm are set to 11 or higher
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -61,14 +61,14 @@ class RouterService : Service() {...}
 ```
 #### 2. Start routing
 ```
-//path跳转Activity
+//Path jumps to Activity
 Router.build("/launcher/main").navigation()
 
-//uri跳转Activity
+//uri jump to Activity
 val uri = Uri.parse("hearthappy://kotlin.ksp.com/model2/ui?name=Uri jump to Modules2Activity &age=18")  
 Router.build(uri).navigation()
 
-//启动服务
+//Start the service
 Router.build("/service/backend").navigation()
 ```
 #### 3. Jump with parameters

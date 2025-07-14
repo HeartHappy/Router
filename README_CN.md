@@ -19,14 +19,15 @@
 
 ### 三、配置
 #### 1、在build.gradle（Project）文件中加入
-```
+```groovy
 plugins{
     id "com.google.devtools.ksp" version "2.0.10-1.0.24"
     id "org.jetbrains.kotlin.jvm" version "2.0.10"
 }
 ```
+
 #### 2、在 build.gradle（app） 文件中加入远程依赖和ksp插件
-```
+```groovy
 //ksp插件
 plugins {
     id 'com.google.devtools.ksp'
@@ -50,7 +51,7 @@ dependencies {
 
 ### 四、使用
 ##### 1、添加注解
-```
+```kotlin
 @Route(path ="/launcher/main") 
 class MainActivity : BaseActivity<ActivityMainBinding>(){...}
 
@@ -61,7 +62,7 @@ class RouterFragment : AbsBaseFragment<FragmentRouterBinding>() {...}
 class RouterService : Service() {...}
 ```
 #### 2、启动路由
-```
+```kotlin
 //path跳转Activity
 Router.build("/launcher/main").navigation()
 
@@ -73,7 +74,7 @@ Router.build(uri).navigation()
  Router.build("/service/backend").navigation()
 ```
 #### 3、携带参数跳转
-```
+```kotlin
 Router.build("/case/inject")  
      .withObject("withObject", UserBean("Labubu", "987654"))  
      .withString("withString", "Labubu")  
@@ -111,7 +112,7 @@ Router.build("/case/inject")
 ```
 #### 4、目标页面注入参数（支持lateinit、Delegates这种延迟或委托函数，自动注入会初始化默认值）
 
-```
+```kotlin
 @Autowired var withObject: UserBean? = null  
   
 @Autowired var withString: String?=null  
@@ -178,7 +179,7 @@ Router.build("/case/inject")
 ```
 
 #### 5、实例化
-```
+```kotlin
 //Fragment
 val fragment = Router.build("/model/fragment").getInstance() as Fragment  
 val beginTransaction = supportFragmentManager.beginTransaction()  
@@ -186,7 +187,7 @@ beginTransaction.add(R.id.fragmentLayout, fragment)
 beginTransaction.commit()
 ```
 #### 6、日志
-```
+```kotlin
 class MyApp : Application() {  
     override fun onCreate() {  
         super.onCreate()  
@@ -195,8 +196,8 @@ class MyApp : Application() {
     }  
 }
 ```
-
-```build.gradle
+//build.gradle
+```groovy
 ksp {  
     arg("enableRouterLog", "true")  //编译时日志 
 }
@@ -210,7 +211,7 @@ ksp {
 ```
 ### 五、高阶用法
 #### 1、对象序列化
-```
+```kotlin
 //如果需要传入自定义对象，请创建一个类实现SerializationService接口，并使用@Route注解。例如：
 @Route(RouterPath.SERVICE_JSON)  
 class JsonService:SerializationService {  
@@ -227,7 +228,7 @@ class JsonService:SerializationService {
 
 #### 2、拦截器
 
-```
+```kotlin
 //priority:值越小，优先执行。
 @Interceptor(priority = 1, name = "RoomInterceptor") 
 class RoomInterceptor : IInterceptor {  
@@ -246,7 +247,7 @@ class RoomInterceptor : IInterceptor {
 }
 ```
 #### 3、重写URL或Path
-```
+```kotlin
 @Route(RouterPath.SERVICE_PATH_REPLACE) 
 class PathReplaceImpl : PathReplaceService {  
     override fun forString(path: String): String {  
@@ -272,7 +273,7 @@ class PathReplaceImpl : PathReplaceService {
 }
 ```
 #### 4、提供服务
-```
+```kotlin
 //开放服务
 interface HelloService: ProviderService {  
   
@@ -288,7 +289,7 @@ class HelloServiceImpl:HelloService {
 }
 ```
 
-```
+```kotlin
 //发现服务
 //方式一：  
 @Autowired var helloService: HelloService? = null  
@@ -309,7 +310,7 @@ val sayHello2 = helloService2.sayHello("KSP Router")
 ```
 #### 五、处理跳转结果
 
-```
+```kotlin
 //新版api
 //1、注册
 private val activityResultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->  ...}
@@ -318,7 +319,7 @@ private val activityResultLauncher: ActivityResultLauncher<Intent> = registerFor
 activityResultLauncher.launch(Intent(this@ForResultActivity, Router.build(RouterPath.MODULES2_UI).getDestination()))  
 ```
 
-```
+```kotlin
 //旧版api
 //1、注册
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {}

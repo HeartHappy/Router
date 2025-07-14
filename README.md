@@ -19,14 +19,14 @@ Use KSP technology to implement routing related functions, mainly to improve com
 
 ### 3. Configuration
 #### 1. Add in build.gradle (Project) file
-```
+```groovy
 plugins{
     id "com.google.devtools.ksp" version "2.0.10-1.0.24"
     id "org.jetbrains.kotlin.jvm" version "2.0.10"
 }
 ```
 #### 2. Add remote dependencies and ksp plugins to the build.gradle (app) file
-```
+```groovy
 //ksp plugin
 plugins {
     id 'com.google.devtools.ksp'
@@ -49,7 +49,7 @@ dependencies {
 ```
 ### 4. Use
 ##### 1. Add annotations
-```
+```kotlin
 @Route(path ="/launcher/main") 
 class MainActivity : BaseActivity<ActivityMainBinding>(){...}
 
@@ -60,7 +60,7 @@ class RouterFragment : AbsBaseFragment<FragmentRouterBinding>() {...}
 class RouterService : Service() {...}
 ```
 #### 2. Start routing
-```
+```kotlin
 //Path jumps to Activity
 Router.build("/launcher/main").navigation()
 
@@ -72,7 +72,7 @@ Router.build(uri).navigation()
 Router.build("/service/backend").navigation()
 ```
 #### 3. Jump with parameters
-```
+```kotlin
 Router.build("/case/inject")  
      .withObject("withObject", UserBean("Labubu", "987654"))  
      .withString("withString", "Labubu")  
@@ -110,7 +110,7 @@ Router.build("/case/inject")
 ```
 #### 4. Target page injection parameters (supports lateinit, Delegates and other delay or delegation functions, automatic injection will initialize the default values)
 
-```
+```kotlin
 @Autowired var withObject: UserBean? = null  
   
 @Autowired var withString: String?=null  
@@ -177,7 +177,7 @@ Router.build("/case/inject")
 ```
 
 #### 5. Instantiation
-```
+```kotlin
 //Fragment
 val fragment = Router.build("/model/fragment").getInstance() as Fragment  
 val beginTransaction = supportFragmentManager.beginTransaction()  
@@ -186,7 +186,7 @@ beginTransaction.commit()
 ```
 
 #### 6. Logs
-```
+```kotlin
 class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
@@ -195,8 +195,8 @@ class MyApp : Application() {
     }
 }
 ```
-
-```build.gradle
+Add to build.gradle file
+```groovy
 ksp {  
     arg("enableRouterLog", "true")  //compile time log
 }
@@ -210,7 +210,7 @@ ksp {
 ```
 ### 5. Advanced usage
 #### 1. Object serialization
-```
+```kotlin
 //If you need to pass in a custom object, create a class that implements the SerializationService interface and use the @Route annotation. For example:
 @Route(RouterPath.SERVICE_JSON)  
 class JsonService:SerializationService {  
@@ -225,7 +225,7 @@ class JsonService:SerializationService {
 }
 ```
 #### 2. Interceptor
-```
+```kotlin
 //priority: The smaller the value, the higher the priority.
 @Interceptor(priority = 1, name = "RoomInterceptor") 
 class RoomInterceptor : IInterceptor {  
@@ -244,7 +244,7 @@ class RoomInterceptor : IInterceptor {
 }
 ```
 #### 3. Rewrite URL or Path
-```
+```kotlin
 @Route(RouterPath.SERVICE_PATH_REPLACE) 
 class PathReplaceImpl : PathReplaceService {  
     override fun forString(path: String): String {  
@@ -270,7 +270,7 @@ class PathReplaceImpl : PathReplaceService {
 }
 ```
 #### 4. Providing services
-```
+```kotlin
 //Open Services
 interface HelloService: ProviderService {  
   
@@ -287,7 +287,7 @@ class HelloServiceImpl:HelloService {
 ```
 
 
-```
+```kotlin
 //Discover service
 //Method 1:
 @Autowired var helloService: HelloService? = null  
@@ -307,7 +307,7 @@ val helloService2 = Router.getInstance(HelloService::class.java)
 val sayHello2 = helloService2.sayHello("KSP Router")
 ```
 #### 5. Processing jump results
-```
+```kotlin
 //New version of api
 //1. Register
 private val activityResultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->  ...}
@@ -316,7 +316,7 @@ private val activityResultLauncher: ActivityResultLauncher<Intent> = registerFor
 activityResultLauncher.launch(Intent(this@ForResultActivity, Router.build(RouterPath.MODULES2_UI).getDestination()))  
 ```
 
-```
+```kotlin
 //Legacy API
 //1、Register
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {}

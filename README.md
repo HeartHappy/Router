@@ -2,6 +2,12 @@
 
 [中文文档](https://github.com/HeartHappy/Router/blob/master/README_CN.md "查看中文版本")
 
+## Table of Contents
+- [Configuration](#3. Configuration)
+- [Detailed Usage](#4. Detailed Usage)
+- [Advanced Usage](#5. Advanced usage)
+- [ARouter migration to Router](#6. ARouter migration to Router)
+
 ### 1. Introduction:
 Use KSP technology to implement routing related functions, mainly to improve compilation performance and solve the compatibility problem between ARouter and KSP. The functions of this project mainly refer to Alibaba's ARouter. I hope Router can bring you a better experience in the project
 
@@ -47,17 +53,17 @@ dependencies {
 	ksp('io.github.hearthappy:router-compiler:1.0.2')
 }
 ```
-### 4. Use
+### 4. Detailed Usage
 ##### 1. Add annotations
 ```kotlin
 @Route(path ="/launcher/main") 
-class MainActivity : BaseActivity<ActivityMainBinding>(){...}
+class MainActivity : BaseActivity<ActivityMainBinding>(){/*...*/}
 
 @Route("/model/fragment") 
-class RouterFragment : AbsBaseFragment<FragmentRouterBinding>() {...}
+class RouterFragment : AbsBaseFragment<FragmentRouterBinding>() {/*...*/}
 
 @Route("/service/backend") 
-class RouterService : Service() {...}
+class RouterService : Service() {/*...*/}
 ```
 #### 2. Start routing
 ```kotlin
@@ -111,6 +117,8 @@ Router.build("/case/inject")
 #### 4. Target page injection parameters (supports lateinit, Delegates and other delay or delegation functions, automatic injection will initialize the default values)
 
 ```kotlin
+import java.io.Serializable
+
 @Autowired var withObject: UserBean? = null  
   
 @Autowired var withString: String?=null  
@@ -339,3 +347,34 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
     }  
 })
 ```
+
+### 6. ARouter migration to Router
+
+#### 1. Press the shortcut keys ctrl+shift+R, search for xxx and replace it with yyy, then click Replace All
+##### 1. Package path replacement table
+| ARouter code (original) | Router code (after replacement) |
+|------------------|---------------------|
+| `com.alibaba.android.arouter.facade.annotation.Route` | `com.hearthappy.router.annotations.Route` |
+| `com.alibaba.android.arouter.facade.annotation.Interceptor` | `com.hearthappy.router.annotations.Interceptor` |
+| `com.alibaba.android.arouter.facade.annotation.Autowired` | `com.hearthappy.router.annotations.Autowired` |
+| `com.alibaba.android.arouter.facade.template.IProvider` | `com.hearthappy.router.service.ProviderService` |
+| `com.alibaba.android.arouter.facade.service.PathReplaceService` | `com.hearthappy.router.service.PathReplaceService` |
+| `com.alibaba.android.arouter.facade.service.SerializationService` | `com.hearthappy.router.service.SerializationService` |
+| `com.alibaba.android.arouter.facade.Postcard` | `com.hearthappy.router.launcher.Sorter` |
+| `com.alibaba.android.arouter.facade.callback.InterceptorCallback` | `com.hearthappy.router.interfaces.InterceptorCallback` |
+| `com.alibaba.android.arouter.facade.template.IInterceptor` | `com.hearthappy.router.interfaces.IInterceptor` |
+
+##### 2、Class name replacement table
+| ARouter code (original) | Router code (after replacement) |
+|------------------|---------------------|
+| `Postcard` | `Sorter` |
+
+##### 3、Example of using method replacement
+| ARouter code (original) | Router code (after replacement) |
+|------------------|---------------------|
+| `ARouter.getInstance()` | `Router` |
+
+
+
+
+#### 2、Replace instantiation with Router.getInstance(xxx) or Router.build("path").getInstance() as (Your class)

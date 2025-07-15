@@ -1,5 +1,12 @@
 # KSP Router
+
 [english](https://github.com/HeartHappy/Router/blob/master/README.md "english")
+
+## 目录
+- [配置](#三、配置)
+- [使用详解](#四、使用详解)
+- [高阶用法](#五、高阶用法)
+- [ARouter 迁移到 Router](#六、ARouter 迁移到 Router)
 
 ### 一、简介：
 使用KSP技术实现路由相关功能，主要提升编译性能，和解决ARouter与KSP兼容问题，本项目的功能主要参考阿里的ARouter。希望Router能在项目中给大家带来更好的体验
@@ -49,17 +56,17 @@ dependencies {
 }
 ```
 
-### 四、使用
+### 四、使用详解
 ##### 1、添加注解
 ```kotlin
 @Route(path ="/launcher/main") 
-class MainActivity : BaseActivity<ActivityMainBinding>(){...}
+class MainActivity : BaseActivity<ActivityMainBinding>(){/*...*/}
 
 @Route("/model/fragment") 
-class RouterFragment : AbsBaseFragment<FragmentRouterBinding>() {...}
+class RouterFragment : AbsBaseFragment<FragmentRouterBinding>() {/*...*/}
 
 @Route("/service/backend") 
-class RouterService : Service() {...}
+class RouterService : Service() {/*...*/}
 ```
 #### 2、启动路由
 ```kotlin
@@ -113,6 +120,8 @@ Router.build("/case/inject")
 #### 4、目标页面注入参数（支持lateinit、Delegates这种延迟或委托函数，自动注入会初始化默认值）
 
 ```kotlin
+import java.io.Serializable
+
 @Autowired var withObject: UserBean? = null  
   
 @Autowired var withString: String?=null  

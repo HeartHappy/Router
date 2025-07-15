@@ -3,10 +3,10 @@
 [中文文档](https://github.com/HeartHappy/Router/blob/master/README_CN.md "查看中文版本")
 
 ## Table of Contents
-- [Configuration](#3. Configuration)
-- [Detailed Usage](#4. Detailed Usage)
-- [Advanced Usage](#5. Advanced usage)
-- [ARouter migration to Router](#6. ARouter migration to Router)
+- [Configuration](#configuration)
+- [Detailed Usage](#detailed-usage)
+- [Advanced Usage](#advanced-usage)
+- [ARouter migration to Router](#migration)
 
 ### 1. Introduction:
 Use KSP technology to implement routing related functions, mainly to improve compilation performance and solve the compatibility problem between ARouter and KSP. The functions of this project mainly refer to Alibaba's ARouter. I hope Router can bring you a better experience in the project
@@ -23,6 +23,7 @@ Use KSP technology to implement routing related functions, mainly to improve com
 #### 9. Support instantiation of target classes, multi-module decoupling (instantiation of subclasses of Fragment and ProvideService)
 #### 10. Support starting services
 
+<a id="configuration"></a>
 ### 3. Configuration
 #### 1. Add in build.gradle (Project) file
 ```groovy
@@ -53,6 +54,7 @@ dependencies {
 	ksp('io.github.hearthappy:router-compiler:1.0.2')
 }
 ```
+<a id="detailed-usage"></a>
 ### 4. Detailed Usage
 ##### 1. Add annotations
 ```kotlin
@@ -216,6 +218,8 @@ ksp {
 -keep class com.hearthappy.router.generate.routes.** { *; }  
 -keep class com.hearthappy.router.generate.path.** { *; }
 ```
+
+<a id="advanced-usage"></a>
 ### 5. Advanced usage
 #### 1. Object serialization
 ```kotlin
@@ -348,6 +352,7 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 })
 ```
 
+<a id="migration"></a>
 ### 6. ARouter migration to Router
 
 #### 1. Press the shortcut keys ctrl+shift+R, search for xxx and replace it with yyy, then click Replace All

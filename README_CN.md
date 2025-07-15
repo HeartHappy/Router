@@ -357,7 +357,7 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 <a id="migration"></a>
 ### 六、ARouter 迁移到 Router
 
-#### 一、按下快捷键ctrl+shift+R，搜索 xxx 并替换为 yyy ,然后点击 Replace All
+#### 一、按下快捷键ctrl+shift+R，搜索: xxx ,替换后： yyy ,然后点击 Replace All
 ##### 1、包路径替换表
 | ARouter代码 (原 xxx) | Router代码 (替换为 yyy) |
 |------------------|---------------------|

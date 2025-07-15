@@ -1,6 +1,6 @@
 # KSP Router
 
-[english](https://github.com/HeartHappy/Router/blob/master/README.md "english")
+[English](https://github.com/HeartHappy/Router/blob/master/README.md "english")
 
 ## 目录
 - [配置](#configuration)
@@ -372,17 +372,17 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 | `com.alibaba.android.arouter.facade.template.IInterceptor` | `com.hearthappy.router.interfaces.IInterceptor` |
 
 ##### 2、类名替换表
-| ARouter代码 (原 xxx) | Router代码 (替换为 yyy) |
+| ARouter代码 (原 xxx) | Router代码 (替换后 yyy) |
 |------------------|---------------------|
 | `Postcard` | `Sorter` |
 
 ##### 3、使用方法替换示例
-| ARouter代码 (原 xxx) | Router代码 (替换为 yyy) |
+| ARouter代码 (原 xxx) | Router代码 (替换后 yyy) |
 |------------------|---------------------|
 | `ARouter.getInstance()` | `Router` |
 
 ##### 4、实例化相关
-| ARouter代码 (原 xxx) | Router代码 (替换为 yyy) |
+| ARouter代码 (原 xxx) | Router代码 (替换后 yyy) |
 |------------------|---------------------|
 | `navigation\(\s*([a-zA-Z0-9_.$]+)\s*::\s*class\s*\.\s*java\s*\)` | `getInstance($1::class.java)` |
 | `navigation\(\s*\)\s*as\s+(\w+)` | `getInstance() as $1` |

@@ -357,7 +357,7 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 
 #### 1. Press the shortcut keys ctrl+shift+R, search for xxx and replace it with yyy, then click Replace All
 ##### 1. Package path replacement table
-| ARouter code (original) | Router code (after replacement) |
+| ARouter code (original xxx) | Router code (After replacement yyy) |
 |------------------|---------------------|
 | `com.alibaba.android.arouter.facade.annotation.Route` | `com.hearthappy.router.annotations.Route` |
 | `com.alibaba.android.arouter.facade.annotation.Interceptor` | `com.hearthappy.router.annotations.Interceptor` |
@@ -370,16 +370,17 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 | `com.alibaba.android.arouter.facade.template.IInterceptor` | `com.hearthappy.router.interfaces.IInterceptor` |
 
 ##### 2、Class name replacement table
-| ARouter code (original) | Router code (after replacement) |
+| ARouter code (original xxx) | Router code (After replacement yyy) |
 |------------------|---------------------|
 | `Postcard` | `Sorter` |
 
 ##### 3、Example of using method replacement
-| ARouter code (original) | Router code (after replacement) |
+| ARouter code (original xxx) | Router code (After replacement yyy) |
 |------------------|---------------------|
 | `ARouter.getInstance()` | `Router` |
 
-
-
-
-#### 2、Replace instantiation with Router.getInstance(xxx) or Router.build("path").getInstance() as (Your class)
+##### 4、Instantiation related
+| ARouter code (original xxx) | Router code (After replacement yyy) |
+|------------------|---------------------|
+| `navigation\(\s*([a-zA-Z0-9_.$]+)\s*::\s*class\s*\.\s*java\s*\)` | `getInstance($1::class.java)` |
+| `navigation\(\s*\)\s*as\s+(\w+)` | `getInstance() as $1` |

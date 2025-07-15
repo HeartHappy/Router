@@ -359,7 +359,7 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 
 #### 一、按下快捷键ctrl+shift+R，搜索 xxx 并替换为 yyy ,然后点击 Replace All
 ##### 1、包路径替换表
-| ARouter代码 (原) | Router代码 (替换后) |
+| ARouter代码 (原 xxx) | Router代码 (替换为 yyy) |
 |------------------|---------------------|
 | `com.alibaba.android.arouter.facade.annotation.Route` | `com.hearthappy.router.annotations.Route` |
 | `com.alibaba.android.arouter.facade.annotation.Interceptor` | `com.hearthappy.router.annotations.Interceptor` |
@@ -372,16 +372,19 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 | `com.alibaba.android.arouter.facade.template.IInterceptor` | `com.hearthappy.router.interfaces.IInterceptor` |
 
 ##### 2、类名替换表
-| ARouter代码 (原) | Router代码 (替换后) |
+| ARouter代码 (原 xxx) | Router代码 (替换为 yyy) |
 |------------------|---------------------|
 | `Postcard` | `Sorter` |
 
 ##### 3、使用方法替换示例
-| ARouter代码 (原) | Router代码 (替换后) |
+| ARouter代码 (原 xxx) | Router代码 (替换为 yyy) |
 |------------------|---------------------|
 | `ARouter.getInstance()` | `Router` |
 
+##### 4、实例化相关
+| ARouter代码 (原 xxx) | Router代码 (替换为 yyy) |
+|------------------|---------------------|
+| `navigation\(\s*([a-zA-Z0-9_.$]+)\s*::\s*class\s*\.\s*java\s*\)` | `getInstance($1::class.java)` |
+| `navigation\(\s*\)\s*as\s+(\w+)` | `getInstance() as $1` |
 
 
-
-#### 二、实例化相关替换为Router.getInstance(xxx) 或 Router.build("path").getInstance() as (Your class) 

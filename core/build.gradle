@@ -98,8 +98,9 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            consumerProguardFiles "consumer-rules.pro"
         }
     }
     compileOptions {
@@ -117,4 +118,5 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation(libs.androidx.startup.runtime)
     api libs.router.annotations
+//    api(project(':annotations'))
 }

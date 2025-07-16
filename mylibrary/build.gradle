@@ -49,8 +49,8 @@ dependencies {
     androidTestImplementation libs.androidx.espresso.core
     implementation project(':common-api')
 
-    implementation project(':annotations')
-    implementation project(':core')
-    ksp project(':compiler')
-
+//    implementation project(':core')
+//    ksp project(':compiler')
+    implementation(libs.router.core)
+    ksp(libs.router.compiler)
 }

@@ -103,6 +103,7 @@ dependencies {
     implementation libs.devtools.ksp
     implementation libs.kotlinpoet.ksp
 //    implementation 'com.squareup:kotlinpoet-ksp:1.12.0'
-    implementation libs.router.annotations
     implementation(libs.kotlinx.corountines)
+    implementation libs.router.annotations
+//    implementation(project(':annotations'))
 }

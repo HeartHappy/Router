@@ -30,7 +30,8 @@ dataStoreVersion = "1.0.0"
 startupRuntime = "1.1.1"
 toastutilsVersion = "10.3"
 vmaVersion="1.0.3"
-routerVersion="1.0.0"
+routerAnnotationsVersion = "1.0.0"
+routerVersion="1.0.2"
 
 [libraries]
 android-basic-ktx = { module = "io.github.hearthappy:android-basic-ktx", version.ref = "androidBasicKtx" }
@@ -67,7 +68,7 @@ datastore-preferences-core = { group = "androidx.datastore", name = "datastore-p
 hearthappy-vma-annotations = { module = "io.github.hearthappy:vma-annotations", version.ref = "vmaVersion" }
 hearthappy-vma-processor = { module = "io.github.hearthappy:vma-processor", version.ref = "vmaVersion" }
 hearthappy-vma-ktx = { module  = "io.github.hearthappy:vma-ktx", version.ref = "vmaVersion" }
-router-annotations = { module = "io.github.hearthappy:router-annotations", version.ref = "routerVersion" }
+router-annotations = { module = "io.github.hearthappy:router-annotations", version.ref = "routerAnnotationsVersion" }
 router-compiler = { module = "io.github.hearthappy:router-compiler", version.ref = "routerVersion" }
 router-core= { module = "io.github.hearthappy:router-core", version.ref = "routerVersion" }
 

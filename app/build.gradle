@@ -5,8 +5,17 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('..\\app\\key\\router_key.jks')
+            storePassword '888888'
+            keyAlias 'yezi'
+            keyPassword '888888'
+        }
+    }
+
     namespace 'com.hearthappy.route'
-    compileSdk  rootProject.ext.compileSdk
+    compileSdk rootProject.ext.compileSdk
 
     defaultConfig {
         applicationId "com.hearthappy.route"
@@ -18,8 +27,11 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            multiDexEnabled true
         }
     }
     compileOptions {
@@ -33,7 +45,17 @@ android {
     buildFeatures {
         viewBinding true
     }
+    android.applicationVariants.all {
+        variant ->
+            variant.outputs.all {
+                output ->
+                    if (buildType.name == "release") {
+                        outputFileName = "ksp-router-demo.apk"
+                    }
+            }
+    }
 }
+
 ksp {
     arg("enableRouterLog", "true")  // 调试时开启
 }
@@ -56,9 +78,9 @@ dependencies {
     implementation project(':mylibrary')
     implementation project(':mylibrary2')
     //router
-    implementation project(':core')
-    ksp project(':compiler')
+//    implementation project(':core')
+//    ksp project(':compiler')
 
-//    implementation(libs.router.core)
-//    ksp(libs.router.compiler)
+    implementation(libs.router.core)
+    ksp(libs.router.compiler)
 }

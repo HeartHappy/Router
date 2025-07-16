@@ -2,6 +2,9 @@
 
 [English](https://github.com/HeartHappy/Router/blob/master/README.md "english")
 
+## Demo
+[demo apk](https://github.com/HeartHappy/Router/blob/master/ksp-router-demo.apk "demo apk")
+
 ## 目录
 - [配置](#configuration)
 - [使用详解](#detailed-usage)
@@ -214,9 +217,13 @@ ksp {
 #### 7、添加混淆规则
 
 ```
--keep class com.hearthappy.router.generate.interceptor.** { *; }  
--keep class com.hearthappy.router.generate.routes.** { *; }  
+-keep class com.hearthappy.router.generate.interceptor.** { *; }
+-keep class com.hearthappy.router.generate.routes.** { *; }
 -keep class com.hearthappy.router.generate.path.** { *; }
+-keep class com.hearthappy.router.generate.provider.** { *; }
+-keep class com.hearthappy.router.enums.**{ *;}
+-keep class * implements com.hearthappy.router.service.**{*;}
+-keep class * implements com.hearthappy.router.interfaces.**{*;}
 ```
 
 <a id="advanced-usage"></a>

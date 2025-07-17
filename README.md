@@ -3,7 +3,9 @@
 [中文文档](https://github.com/HeartHappy/Router/blob/master/README_CN.md "查看中文版本")
 
 ## Demo
-[demo apk](https://github.com/HeartHappy/Router/blob/master/ksp-router-demo.apk "demo apk")
+<a href="https://github.com/HeartHappy/Router/blob/master/ksp-router-demo.apk" download>
+  demo apk
+</a>
 
 ## Table of Contents
 - [Configuration](#configuration)

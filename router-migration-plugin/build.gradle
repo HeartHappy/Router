@@ -1,0 +1,127 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group = 'io.github.hearthappy'
+version = rootProject.ext.publishVersion
+
+def artifactName = 'router-migration-plugin'
+def releaseRepoUrl = findProperty('routerReleaseRepoUrl') ?: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+def snapshotRepoUrl = findProperty('routerSnapshotRepoUrl') ?: 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+def publishUser = findProperty('ossrhUsername') ?: System.getenv('OSSRH_USERNAME')
+def publishPassword = findProperty('ossrhPassword') ?: System.getenv('OSSRH_PASSWORD')
+def requestedTaskNames = gradle.startParameter.taskNames.collect { it.toLowerCase() }
+def remotePublishRequested = requestedTaskNames.any { it.contains('toremoterepository') }
+def releasePublishRequested = remotePublishRequested && !version.toString().endsWith('SNAPSHOT')
+
+gradlePlugin {
+    plugins {
+        routerMigrationPlugin {
+            id = 'com.hearthappy.router.migration'
+            implementationClass = 'com.hearthappy.router.migration.RouterMigrationPlugin'
+            displayName = 'Router Migration Plugin'
+            description = 'Migrate ARouter source code and Gradle scripts to Router.'
+        }
+    }
+}
+
+java {
+    sourceCompatibility = rootProject.ext.javaVersion
+    targetCompatibility = rootProject.ext.javaVersion
+    withSourcesJar()
+    withJavadocJar()
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = rootProject.ext.kotlinJvmTarget
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = rootProject.ext.kotlinJvmTarget
+}
+
+dependencies {
+    implementation gradleApi()
+}
+
+tasks.register('zipRepo', Zip) {
+    from "$buildDir/repo"
+    archiveFileName = "${artifactName}.zip"
+    destinationDirectory = file(buildDir)
+}
+
+afterEvaluate {
+    publishing {
+        publications.withType(MavenPublication).configureEach { publication ->
+            pom {
+                name = publication.name == 'pluginMaven' ? artifactName : publication.artifactId
+                description = 'Gradle plugin for migrating ARouter projects to Router.'
+                url = 'https://github.com/HeartHappy/Router'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'HeartHappy'
+                        name = 'এ᭄白ຼ龙້໌ᮨꦿ'
+                        email = '1096885636@qq.com'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git://github.com/HeartHappy/Router'
+                    developerConnection = 'scm:git:ssh://github.com/HeartHappy/Router'
+                    url = 'https://github.com/HeartHappy/Router'
+                }
+            }
+        }
+
+        publications.named('pluginMaven', MavenPublication) {
+            artifactId = artifactName
+        }
+
+        repositories {
+            maven {
+                name = 'projectLocal'
+                url = uri("${buildDir}/repo")
+            }
+            maven {
+                name = 'remote'
+                url = uri(version.toString().endsWith('SNAPSHOT') ? snapshotRepoUrl : releaseRepoUrl)
+                credentials {
+                    username = publishUser
+                    password = publishPassword
+                }
+            }
+        }
+    }
+
+    signing {
+        required { releasePublishRequested }
+        if (releasePublishRequested) {
+            if (project.hasProperty('signing.secretKeyRingFile')) {
+                project.ext.set(
+                    'signing.secretKeyRingFile',
+                    rootProject.file(project.property('signing.secretKeyRingFile')).absolutePath
+                )
+            }
+            sign(publishing.publications)
+        }
+    }
+
+    tasks.named('zipRepo') {
+        dependsOn 'publishAllPublicationsToProjectLocalRepository'
+    }
+
+    tasks.named('publishAllPublicationsToProjectLocalRepository') {
+        finalizedBy tasks.named('zipRepo')
+    }
+}

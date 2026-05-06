@@ -47,7 +47,7 @@ afterEvaluate {
                 pom {
                     name = 'router-annotations'
                     description = 'Router Annotation Library'
-                    url = 'https://github.com/HeartHappy/ViewModelAutomationX'
+                    url = 'https://github.com/HeartHappy/Router'
 
                     licenses {
                         license {

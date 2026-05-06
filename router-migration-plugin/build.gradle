@@ -9,13 +9,12 @@ group = 'io.github.hearthappy'
 version = rootProject.ext.publishVersion
 
 def artifactName = 'router-migration-plugin'
-def releaseRepoUrl = findProperty('routerReleaseRepoUrl') ?: 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-def snapshotRepoUrl = findProperty('routerSnapshotRepoUrl') ?: 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-def publishUser = findProperty('ossrhUsername') ?: System.getenv('OSSRH_USERNAME')
-def publishPassword = findProperty('ossrhPassword') ?: System.getenv('OSSRH_PASSWORD')
-def requestedTaskNames = gradle.startParameter.taskNames.collect { it.toLowerCase() }
-def remotePublishRequested = requestedTaskNames.any { it.contains('toremoterepository') }
-def releasePublishRequested = remotePublishRequested && !version.toString().endsWith('SNAPSHOT')
+def signingKeyRingFile = rootProject.findProperty('signing.secretKeyRingFile')
+def signingKeyRing = signingKeyRingFile ? rootProject.file(signingKeyRingFile) : null
+def hasSigningConfig =
+        rootProject.hasProperty('signing.keyId') &&
+                rootProject.hasProperty('signing.password') &&
+                signingKeyRing?.exists()
 
 gradlePlugin {
     plugins {
@@ -90,38 +89,24 @@ afterEvaluate {
 
         repositories {
             maven {
-                name = 'projectLocal'
                 url = uri("${buildDir}/repo")
-            }
-            maven {
-                name = 'remote'
-                url = uri(version.toString().endsWith('SNAPSHOT') ? snapshotRepoUrl : releaseRepoUrl)
-                credentials {
-                    username = publishUser
-                    password = publishPassword
-                }
             }
         }
     }
 
     signing {
-        required { releasePublishRequested }
-        if (releasePublishRequested) {
-            if (project.hasProperty('signing.secretKeyRingFile')) {
-                project.ext.set(
-                    'signing.secretKeyRingFile',
-                    rootProject.file(project.property('signing.secretKeyRingFile')).absolutePath
-                )
-            }
+        // 仅在根工程提供可用密钥文件时启用签名，避免本地发布被阻塞
+        required { hasSigningConfig }
+        if (hasSigningConfig) {
             sign(publishing.publications)
         }
     }
 
     tasks.named('zipRepo') {
-        dependsOn 'publishAllPublicationsToProjectLocalRepository'
+        dependsOn 'publishAllPublicationsToMavenRepository'
     }
 
-    tasks.named('publishAllPublicationsToProjectLocalRepository') {
+    tasks.named('publishAllPublicationsToMavenRepository') {
         finalizedBy tasks.named('zipRepo')
     }
 }

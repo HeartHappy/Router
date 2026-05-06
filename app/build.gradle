@@ -60,7 +60,6 @@ ksp {
     arg("enableRouterLog", "true")  // 调试时开启
 }
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material

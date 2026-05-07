@@ -177,12 +177,31 @@ buildscript {
 apply plugin: 'io.hearthappy.router.migration'
 ```
 
+并且在每个需要迁移的模块 `build.gradle` 中配置：
+
+```groovy
+routerMigration {
+    scanDir = rootDir
+    dryRun = false
+    reportFile = file("$buildDir/reports/router-migration/report.txt")
+    includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
+    excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
+    enableGradleDependencyMigration = true
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    kspPluginVersion = "1.9.24-1.0.20"
+}
+```
+
 说明：
 
 - `plugins {}` 方式依赖 `pluginManagement.repositories`
 - `apply plugin:` 方式依赖 `buildscript.repositories + buildscript.dependencies.classpath`
 - 你看到 `~/.m2/repository/io/github/hearthappy/router-migration-plugin/1.0.2` 只能说明插件主包已经发布成功
 - 如果使用 `apply plugin:`，没有把插件加入 `buildscript classpath`，Gradle 仍然会报 `Plugin with id ... not found`
+- `routerMigration {}` 必须配置在需要迁移的模块 `build.gradle` 中，例如 `app/build.gradle`
+- 如果你在项目根目录执行 `.\gradlew migrateArouterToRouter`，那么所有应用了迁移插件的子模块都必须配置 `routerMigration {}`
+- 只要有一个应用了迁移插件的子模块没有配置 `routerMigration {}`，命令就会报错
 
 ## 4. 可配置项
 

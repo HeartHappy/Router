@@ -375,7 +375,9 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 - 在项目根 `build.gradle` 中加入：`classpath "io.github.hearthappy:router-migration-plugin:1.0.2"`
 - 或者使用 `plugins {}` 方式集成迁移插件
 - 在需要迁移的模块中，例如 `app/build.gradle`，添加：`apply plugin: 'io.hearthappy.router.migration'`
+- 在每个需要迁移的模块 `build.gradle` 中，都必须添加 `routerMigration {}` 迁移配置
 - Gradle 同步完成后，执行 `migrateArouterToRouter` 任务完成一键迁移
+- 如果在项目根目录执行 `.\gradlew migrateArouterToRouter`，则所有应用了 `io.hearthappy.router.migration` 插件的子模块都必须配置 `routerMigration {}`，只要有一个未配置就会报错
 - 更多迁移细节请参考 [Migration.md](Migration.md)
 
 `buildscript + apply plugin` 方式示例：
@@ -397,6 +399,20 @@ buildscript {
 apply plugin: 'io.hearthappy.router.migration'
 ```
 
+```groovy
+routerMigration {
+    scanDir = rootDir
+    dryRun = false
+    reportFile = file("$buildDir/reports/router-migration/report.txt")
+    includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
+    excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
+    enableGradleDependencyMigration = true
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    kspPluginVersion = "1.9.24-1.0.20"
+}
+```
+
 `plugins {}` 方式示例：
 
 ```groovy
@@ -405,11 +421,31 @@ plugins {
 }
 ```
 
+```groovy
+routerMigration {
+    scanDir = rootDir
+    dryRun = false
+    reportFile = file("$buildDir/reports/router-migration/report.txt")
+    includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
+    excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
+    enableGradleDependencyMigration = true
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    kspPluginVersion = "1.9.24-1.0.20"
+}
+```
+
 执行迁移任务：
 
 ```bash
 ./gradlew migrateArouterToRouter
 ```
+
+说明：
+
+- `routerMigration {}` 应该配置在需要迁移的模块 `build.gradle` 中，例如 `app/build.gradle`
+- 如果你有多个业务模块都需要迁移，那么每个应用了迁移插件的模块都要各自补充 `routerMigration {}` 配置
+- 如果某个模块应用了迁移插件但没有配置 `routerMigration {}`，在项目根执行 `.\gradlew migrateArouterToRouter` 时会直接报错
 
 #### 6.2、手动迁移
 

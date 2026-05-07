@@ -373,7 +373,9 @@ Migration steps:
 - Add `classpath "io.github.hearthappy:router-migration-plugin:1.0.2"` to the project root `build.gradle`
 - Or integrate the migration plugin with the `plugins {}` style
 - In the module that needs migration, for example `app/build.gradle`, add `apply plugin: 'io.hearthappy.router.migration'`
+- In every module that needs migration, you must also add the `routerMigration {}` configuration block in that module's `build.gradle`
 - After Gradle sync, run the `migrateArouterToRouter` task to complete one-click migration
+- If you run `.\gradlew migrateArouterToRouter` from the project root, then every submodule that applies `io.hearthappy.router.migration` must define `routerMigration {}`; if one module is missing it, the build will fail
 - For more migration details, see [Migration.md](Migration.md)
 
 Example using `buildscript + apply plugin`:
@@ -395,6 +397,20 @@ buildscript {
 apply plugin: 'io.hearthappy.router.migration'
 ```
 
+```groovy
+routerMigration {
+    scanDir = rootDir
+    dryRun = false
+    reportFile = file("$buildDir/reports/router-migration/report.txt")
+    includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
+    excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
+    enableGradleDependencyMigration = true
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    kspPluginVersion = "1.9.24-1.0.20"
+}
+```
+
 Example using `plugins {}`:
 
 ```groovy
@@ -403,11 +419,31 @@ plugins {
 }
 ```
 
+```groovy
+routerMigration {
+    scanDir = rootDir
+    dryRun = false
+    reportFile = file("$buildDir/reports/router-migration/report.txt")
+    includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
+    excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
+    enableGradleDependencyMigration = true
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    kspPluginVersion = "1.9.24-1.0.20"
+}
+```
+
 Run the migration task:
 
 ```bash
 ./gradlew migrateArouterToRouter
 ```
+
+Notes:
+
+- `routerMigration {}` should be configured in the `build.gradle` of the module that you want to migrate, for example `app/build.gradle`
+- If multiple business modules need migration, every module that applies the migration plugin must declare its own `routerMigration {}`
+- If one module applies the plugin but does not configure `routerMigration {}`, running `.\gradlew migrateArouterToRouter` from the project root will fail
 
 #### 6.2 Manual Migration
 

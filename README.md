@@ -8,6 +8,7 @@
 </a>
 
 ## Table of Contents
+- [Plugin One-Click Migration (ARouter ---> Router)](#migration-one-click)
 - [Configuration](#configuration)
 - [Detailed Usage](#detailed-usage)
 - [Advanced Usage](#advanced-usage)
@@ -364,7 +365,53 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 <a id="migration"></a>
 ### 6. ARouter migration to Router
 
-#### 1. Press the shortcut keys ctrl+shift+R, search for xxx and replace it with yyy, then click Replace All
+<a id="migration-one-click"></a>
+#### 6.1 One-Click Migration
+
+Migration steps:
+
+- Add `classpath "io.github.hearthappy:router-migration-plugin:1.0.2"` to the project root `build.gradle`
+- Or integrate the migration plugin with the `plugins {}` style
+- In the module that needs migration, for example `app/build.gradle`, add `apply plugin: 'io.hearthappy.router.migration'`
+- After Gradle sync, run the `migrateArouterToRouter` task to complete one-click migration
+- For more migration details, see [Migration.md](Migration.md)
+
+Example using `buildscript + apply plugin`:
+
+```groovy
+buildscript {
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.github.hearthappy:router-migration-plugin:1.0.2"
+    }
+}
+```
+
+```groovy
+apply plugin: 'io.hearthappy.router.migration'
+```
+
+Example using `plugins {}`:
+
+```groovy
+plugins {
+    id 'io.hearthappy.router.migration' version '1.0.2'
+}
+```
+
+Run the migration task:
+
+```bash
+./gradlew migrateArouterToRouter
+```
+
+#### 6.2 Manual Migration
+
+Press `ctrl+shift+R`, search for `xxx`, replace it with `yyy`, and then click `Replace All`
 ##### 1. Package path replacement table
 | ARouter code (original xxx) | Router code (After replacement yyy) |
 |------------------|---------------------|

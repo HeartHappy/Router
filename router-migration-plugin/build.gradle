@@ -23,12 +23,6 @@ gradlePlugin {
             displayName = 'Router Migration Plugin'
             description = 'Migrate ARouter source code and Gradle scripts to Router.'
         }
-        routerMigrationPluginCompat {
-            id = 'com.hearthappy.router.migration'
-            implementationClass = 'com.hearthappy.router.migration.RouterMigrationPlugin'
-            displayName = 'Router Migration Plugin'
-            description = 'Migrate ARouter source code and Gradle scripts to Router.'
-        }
     }
 }
 

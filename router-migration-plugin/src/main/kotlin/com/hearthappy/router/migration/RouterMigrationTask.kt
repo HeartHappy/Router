@@ -47,6 +47,7 @@ open class RouterMigrationTask : DefaultTask() {
         val reportFile = resolveReportFile()
         val isDryRun = dryRunOverride ?: extension.dryRun
         val rules = baseRules()
+        val requiresKspSupport = if (extension.enableGradleDependencyMigration) detectKspSupportRequirement(scanRoot) else false
 
         if (!scanRoot.exists() || !scanRoot.isDirectory) {
             throw IllegalArgumentException("routerMigration.scanDir does not exist or is not a directory: ${scanRoot.absolutePath}")
@@ -62,7 +63,7 @@ open class RouterMigrationTask : DefaultTask() {
             .filter { candidate -> candidate.isFile && shouldMigrate(candidate) }
             .forEach { file ->
                 scannedFiles += file
-                migrateFile(file, scanRoot, rules)?.let { result ->
+                migrateFile(file, scanRoot, rules, requiresKspSupport)?.let { result ->
                     fileResults += result
                     val relativePath = result.relativePath
                     val details = result.ruleHits.joinToString { "${it.ruleId}=${it.count}" }
@@ -87,7 +88,8 @@ open class RouterMigrationTask : DefaultTask() {
     private fun migrateFile(
         file: File,
         scanRoot: File,
-        rules: List<RouterMigrationRule>
+        rules: List<RouterMigrationRule>,
+        requiresKspSupport: Boolean
     ): FileMigrationResult? {
         val originalText = file.readText(StandardCharsets.UTF_8)
         var migratedText = originalText
@@ -103,7 +105,7 @@ open class RouterMigrationTask : DefaultTask() {
             }
 
         if (isGradleFile(file) && extension.enableGradleDependencyMigration) {
-            val gradleResults = applyGradleMigration(file, migratedText, scanRoot)
+            val gradleResults = applyGradleMigration(file, migratedText, scanRoot, requiresKspSupport)
             migratedText = gradleResults.updatedText
             ruleHits += gradleResults.ruleHits
         }
@@ -124,10 +126,16 @@ open class RouterMigrationTask : DefaultTask() {
         )
     }
 
-    private fun applyGradleMigration(file: File, content: String, scanRoot: File): GradleMigrationResult {
+    private fun applyGradleMigration(
+        file: File,
+        content: String,
+        scanRoot: File,
+        requiresKspSupport: Boolean
+    ): GradleMigrationResult {
         var updatedText = content
         val ruleHits = mutableListOf<RuleHit>()
         val isKotlinDsl = file.name.endsWith(".gradle.kts")
+        val resolvedKspVersion = if (requiresKspSupport) resolveKspPluginVersion(scanRoot) else null
 
         val apiRule = if (isKotlinDsl) {
             KTS_AROUTER_API_REGEX to "$1$2(\"${extension.routerCoreDependency}\")$3"
@@ -159,7 +167,14 @@ open class RouterMigrationTask : DefaultTask() {
             )
         }
 
-        val pluginInsertion = insertKspPluginIfNeeded(file, updatedText, scanRoot, isKotlinDsl)
+        val pluginInsertion = insertKspPluginIfNeeded(
+            file = file,
+            content = updatedText,
+            scanRoot = scanRoot,
+            isKotlinDsl = isKotlinDsl,
+            requiresKspSupport = requiresKspSupport,
+            kspPluginVersion = resolvedKspVersion
+        )
         if (pluginInsertion.count > 0) {
             updatedText = pluginInsertion.updatedText
             ruleHits += RuleHit(
@@ -176,8 +191,14 @@ open class RouterMigrationTask : DefaultTask() {
         file: File,
         content: String,
         scanRoot: File,
-        isKotlinDsl: Boolean
+        isKotlinDsl: Boolean,
+        requiresKspSupport: Boolean,
+        kspPluginVersion: String?
     ): TextReplacementResult {
+        if (!requiresKspSupport) {
+            return TextReplacementResult.noChanges(content)
+        }
+
         val isRootBuildFile = file.parentFile == scanRoot && file.name.startsWith("build.gradle")
         if (isRootBuildFile) {
             if (ROOT_KSP_PLUGIN_REGEX.containsMatchIn(content) ||
@@ -189,9 +210,9 @@ open class RouterMigrationTask : DefaultTask() {
 
             if (content.contains("plugins")) {
                 val insertion = if (isKotlinDsl) {
-                    """    id("com.google.devtools.ksp") version "${extension.kspPluginVersion}" apply false"""
+                    """    id("com.google.devtools.ksp") version "$kspPluginVersion" apply false"""
                 } else {
-                    """    id 'com.google.devtools.ksp' version '${extension.kspPluginVersion}' apply false"""
+                    """    id 'com.google.devtools.ksp' version '$kspPluginVersion' apply false"""
                 }
                 return insertIntoPluginsBlock(
                     content = content,
@@ -204,7 +225,7 @@ open class RouterMigrationTask : DefaultTask() {
             if (!isKotlinDsl && content.contains("buildscript")) {
                 return insertIntoBuildscriptDependencies(
                     content = content,
-                    insertionLine = "        classpath \"com.google.devtools.ksp:symbol-processing-gradle-plugin:${extension.kspPluginVersion}\"",
+                    insertionLine = "        classpath \"com.google.devtools.ksp:symbol-processing-gradle-plugin:$kspPluginVersion\"",
                     ruleId = "gradle-root-ksp-classpath",
                     description = "Add KSP classpath dependency to root buildscript"
                 )
@@ -251,6 +272,30 @@ open class RouterMigrationTask : DefaultTask() {
         }
 
         return TextReplacementResult.noChanges(content)
+    }
+
+    private fun detectKspSupportRequirement(scanRoot: File): Boolean {
+        return scanRoot.walkTopDown()
+            .onEnter { directory -> shouldEnter(directory, scanRoot) }
+            .filter { candidate -> candidate.isFile && isGradleFile(candidate) }
+            .any { file ->
+                val content = file.readText(StandardCharsets.UTF_8)
+                GROOVY_AROUTER_COMPILER_REGEX.containsMatchIn(content) ||
+                    KTS_AROUTER_COMPILER_REGEX.containsMatchIn(content) ||
+                    content.contains("ksp(") ||
+                    content.contains("ksp '") ||
+                    content.contains("ksp(\"") ||
+                    content.contains(extension.routerCompilerDependency)
+            }
+    }
+
+    private fun resolveKspPluginVersion(scanRoot: File): String {
+        return extension.kspPluginVersion?.trim()?.takeIf { it.isNotEmpty() }
+            ?: throw IllegalStateException(
+                "KSP migration requires routerMigration.kspPluginVersion to be set explicitly. " +
+                    "The KSP version must match the Kotlin version used by the target project. " +
+                    "Example: Kotlin 1.9.24 -> KSP 1.9.24-1.0.20; Kotlin 2.0.10 -> KSP 2.0.10-1.0.24."
+            )
     }
 
     private fun insertIntoBuildscriptDependencies(

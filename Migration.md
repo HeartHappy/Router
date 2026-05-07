@@ -49,7 +49,7 @@
 - `Postcard` -> `Sorter`
 - `IProvider` -> `ProviderService`
 - `ARouter.getInstance()` -> `Router`
-- 删除 `ARouter.init(this)`
+- 删除 `ARouter.init(...)`
 - 删除 `ARouter.openDebug()`
 - `ARouter.openLog()` -> `Router.openLog()`
 
@@ -124,7 +124,7 @@ routerMigration {
     reportFile = file("$buildDir/reports/router-migration/report.txt")
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "2.0.10-1.0.24"
+    kspPluginVersion = "1.9.24-1.0.20"
 }
 ```
 
@@ -141,7 +141,7 @@ routerMigration {
     reportFile = file("$buildDir/reports/router-migration/report.txt")
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "2.0.10-1.0.24"
+    kspPluginVersion = "1.9.24-1.0.20"
 }
 ```
 
@@ -177,18 +177,6 @@ buildscript {
 apply plugin: 'io.hearthappy.router.migration'
 ```
 
-兼容旧 ID 的写法也支持：
-
-```groovy
-apply plugin: 'com.hearthappy.router.migration'
-```
-
-推荐优先使用：
-
-```groovy
-apply plugin: 'io.hearthappy.router.migration'
-```
-
 说明：
 
 - `plugins {}` 方式依赖 `pluginManagement.repositories`
@@ -198,7 +186,7 @@ apply plugin: 'io.hearthappy.router.migration'
 
 ## 4. 可配置项
 
-- `scanDir`：扫描根目录，默认当前工程目录
+- `scanDir`：扫描根目录，默认当前工程根目录
 - `dryRun`：是否只预演不写文件，默认 `false`
 - `reportFile`：报告输出文件
 - `includeFileSuffixes`：扫描的文件后缀集合
@@ -206,7 +194,7 @@ apply plugin: 'io.hearthappy.router.migration'
 - `enableGradleDependencyMigration`：是否迁移 Gradle 依赖，默认 `true`
 - `routerCoreDependency`：替换后的 `router-core` 坐标
 - `routerCompilerDependency`：替换后的 `router-compiler` 坐标
-- `kspPluginVersion`：自动补充 KSP 插件时使用的版本
+- `kspPluginVersion`：必填；必须显式指定，且必须与目标工程 Kotlin 版本严格对应
 
 示例：
 
@@ -220,9 +208,48 @@ routerMigration {
     enableGradleDependencyMigration = true
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "2.0.10-1.0.24"
+    kspPluginVersion = "1.9.24-1.0.20"
 }
 ```
+
+### 4.1 必须显式配置 `kspPluginVersion`
+
+如果不配置：
+
+- 迁移插件在处理 `arouter-compiler -> ksp(...)` 时会直接报错
+- 老项目即使已经接入了迁移插件，也无法正确补全 KSP 插件与根脚本 classpath
+- 这是因为 KSP 与 Kotlin 编译器版本强相关，不能随意写死为某一个版本
+
+因此，`routerMigration.kspPluginVersion` 必须显式配置。
+
+推荐写法：
+
+```groovy
+routerMigration {
+    kspPluginVersion = "1.9.24-1.0.20"
+}
+```
+
+### 4.2 重点说明：KSP 版本必须与 Kotlin 版本保持一致
+
+你必须保证目标工程中的 Kotlin 版本与配置的 KSP 版本严格对应，否则会出现 Gradle 同步失败、插件不兼容或 `ksp(...)` 无法工作等问题。
+
+推荐对应关系：
+
+- Kotlin `1.9.24` -> KSP `1.9.24-1.0.20`
+- Kotlin `2.0.10` -> KSP `2.0.10-1.0.24`
+
+推荐优先使用以下版本组合：
+
+- 推荐组合 1：Kotlin `1.9.24` + KSP `1.9.24-1.0.20`
+- 推荐组合 2：Kotlin `2.0.10` + KSP `2.0.10-1.0.24`
+
+错误示例：
+
+- Kotlin `1.9.24` 搭配 KSP `2.0.10-1.0.24`
+- Kotlin `2.0.10` 搭配 KSP `1.9.24-1.0.20`
+
+这两类组合都不兼容，不建议使用。
 
 ## 5. 使用方式
 

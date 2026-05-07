@@ -17,5 +17,5 @@ open class RouterMigrationExtension(project: Project) {
     var enableGradleDependencyMigration: Boolean = true
     var routerCoreDependency: String = "io.github.hearthappy:router-core:1.0.2"
     var routerCompilerDependency: String = "io.github.hearthappy:router-compiler:1.0.2"
-    var kspPluginVersion: String = "2.0.10-1.0.24"
+    var kspPluginVersion: String? = null
 }

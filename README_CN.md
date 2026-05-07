@@ -8,6 +8,7 @@
 </a>
 
 ## 目录
+- [插件一键迁移（ARouter ---> Router）](#migration-one-click)
 - [配置](#configuration)
 - [使用详解](#detailed-usage)
 - [高阶用法](#advanced-usage)
@@ -366,7 +367,53 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 <a id="migration"></a>
 ### 六、ARouter 迁移到 Router
 
-#### 一、按下快捷键ctrl+shift+R，搜索: xxx ,替换后： yyy ,然后点击 Replace All
+<a id="migration-one-click"></a>
+#### 6.1、一键迁移
+
+迁移步骤：
+
+- 在项目根 `build.gradle` 中加入：`classpath "io.github.hearthappy:router-migration-plugin:1.0.2"`
+- 或者使用 `plugins {}` 方式集成迁移插件
+- 在需要迁移的模块中，例如 `app/build.gradle`，添加：`apply plugin: 'io.hearthappy.router.migration'`
+- Gradle 同步完成后，执行 `migrateArouterToRouter` 任务完成一键迁移
+- 更多迁移细节请参考 [Migration.md](Migration.md)
+
+`buildscript + apply plugin` 方式示例：
+
+```groovy
+buildscript {
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.github.hearthappy:router-migration-plugin:1.0.2"
+    }
+}
+```
+
+```groovy
+apply plugin: 'io.hearthappy.router.migration'
+```
+
+`plugins {}` 方式示例：
+
+```groovy
+plugins {
+    id 'io.hearthappy.router.migration' version '1.0.2'
+}
+```
+
+执行迁移任务：
+
+```bash
+./gradlew migrateArouterToRouter
+```
+
+#### 6.2、手动迁移
+
+按下快捷键 `ctrl+shift+R`，搜索 `xxx`，替换后： `yyy`，然后点击 `Replace All`
 ##### 1、包路径替换表
 | ARouter代码 (原 xxx) | Router代码 (替换为 yyy) |
 |------------------|---------------------|

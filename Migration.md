@@ -1,39 +1,26 @@
-# ARouter 到 Router 插件迁移说明
+# ARouter 迁移插件说明
 
-## 1. 简介
+## 1. 插件简介
 
-为了把 `README_CN.md` 中“六、ARouter 迁移到 Router 的架构迁移方式”落地为可执行能力，项目新增了一个独立插件模块 `router-migration-plugin`。
+`router-migration-plugin` 是一个用于将 ARouter 工程批量迁移到 Router 的 Gradle 插件。
 
-这个插件的目标是：
+插件 ID：
 
-- 通过 Gradle 任务批量迁移 ARouter 代码到 Router
-- 在迁移过程中输出清晰日志
-- 在迁移完成后生成迁移报告
-- 支持先预演、再正式执行
-- 支持插件发布到本地仓库和远程仓库，便于在业务工程中集成
+- `io.hearthappy.router.migration`
 
-## 2. 插件能力
+当前提供两个任务：
 
-当前插件已经支持以下迁移内容：
+- `previewArouterToRouterMigration`：仅预览，并输出可迁移报告文件和日志
+- `migrateArouterToRouter`：执行实际迁移并写回文件
 
-- 替换 ARouter 注解和相关类的导包
-- 替换 `Postcard -> Sorter`
-- 替换 `IProvider -> ProviderService`
-- 替换 `ARouter.getInstance() -> Router`
-- 替换 `navigation(SomeClass::class.java) -> getInstance(SomeClass::class.java)`
-- 替换 `navigation() as Xxx -> getInstance() as Xxx`
-- 替换 `build.gradle` / `build.gradle.kts` 中的 ARouter 依赖
-- 将 `kapt` 或 `annotationProcessor` 的 `arouter-compiler` 替换为 `ksp`
-- 在需要时自动补充 `com.google.devtools.ksp` 插件声明
+插件支持扫描：
 
-默认扫描以下文件：
+- Kotlin 源码：`*.kt`
+- Java 源码：`*.java`
+- Groovy Gradle：`*.gradle`
+- Kotlin DSL Gradle：`*.gradle.kts`
 
-- `*.kt`
-- `*.java`
-- `*.gradle`
-- `*.gradle.kts`
-
-默认忽略以下目录：
+默认忽略目录：
 
 - `.git`
 - `.gradle`
@@ -42,103 +29,98 @@
 - `build`
 - `out`
 
-## 3. 插件模块位置
+## 2. 当前支持的迁移范围
 
-插件模块位于：
+### 2.1 源码迁移
 
-- `router-migration-plugin`
+已支持以下源码替换：
 
-插件 ID：
+- `com.alibaba.android.arouter.launcher.ARouter` -> `com.hearthappy.router.launcher.Router`
+- `com.alibaba.android.arouter.facade.annotation.Route` -> `com.hearthappy.router.annotations.Route`
+- `com.alibaba.android.arouter.facade.annotation.Interceptor` -> `com.hearthappy.router.annotations.Interceptor`
+- `com.alibaba.android.arouter.facade.annotation.Autowired` -> `com.hearthappy.router.annotations.Autowired`
+- `com.alibaba.android.arouter.facade.template.IProvider` -> `com.hearthappy.router.service.ProviderService`
+- `com.alibaba.android.arouter.facade.service.PathReplaceService` -> `com.hearthappy.router.service.PathReplaceService`
+- `com.alibaba.android.arouter.facade.service.SerializationService` -> `com.hearthappy.router.service.SerializationService`
+- `com.alibaba.android.arouter.facade.Postcard` -> `com.hearthappy.router.launcher.Sorter`
+- `com.alibaba.android.arouter.facade.callback.NavigationCallback` -> `com.hearthappy.router.interfaces.NavigationCallback`
+- `com.alibaba.android.arouter.facade.callback.InterceptorCallback` -> `com.hearthappy.router.interfaces.InterceptorCallback`
+- `com.alibaba.android.arouter.facade.template.IInterceptor` -> `com.hearthappy.router.interfaces.IInterceptor`
+- `Postcard` -> `Sorter`
+- `IProvider` -> `ProviderService`
+- `ARouter.getInstance()` -> `Router`
+- 删除 `ARouter.init(this)`
+- 删除 `ARouter.openDebug()`
+- `ARouter.openLog()` -> `Router.openLog()`
 
-- `com.hearthappy.router.migration`
+### 2.2 Kotlin 语法迁移
 
-任务名称：
+当前已支持的 Kotlin 常见写法：
 
-- `previewArouterToRouterMigration`
-- `migrateArouterToRouter`
+- `ARouter.getInstance().navigation(Service::class.java)` -> `Router.getInstance(Service::class.java)`
+- `ARouter.getInstance().build("/service/demo").navigation() as DemoService` -> `Router.build("/service/demo").getInstance() as DemoService`
 
-## 4. 在当前仓库中开发和验证
+### 2.3 Java 语法迁移
 
-在当前仓库中可以直接编译插件模块：
+当前已支持的 Java 常见写法：
 
-```bash
-./gradlew :router-migration-plugin:build
-```
+- `ARouter.getInstance().navigation(DemoService.class)` -> `Router.getInstance(DemoService.class)`
+- `(DemoService) ARouter.getInstance().build("/service/demo").navigation()` -> `(DemoService) Router.build("/service/demo").getInstance()`
 
-预演迁移：
+### 2.4 Gradle 迁移
 
-```bash
-./gradlew previewArouterToRouterMigration
-```
+当前已支持以下 Gradle 替换：
 
-正式执行迁移：
+- `com.alibaba:arouter-api` -> `io.github.hearthappy:router-core`
+- `kapt("com.alibaba:arouter-compiler")` -> `ksp("io.github.hearthappy:router-compiler")`
+- `annotationProcessor 'com.alibaba:arouter-compiler'` -> `ksp 'io.github.hearthappy:router-compiler'`
+- 在根脚本缺失时自动补充 `com.google.devtools.ksp` 版本声明
+- 在模块脚本缺失时自动补充 `com.google.devtools.ksp` 插件声明
+- 对老式 `buildscript {}` 根脚本自动补充 `classpath "com.google.devtools.ksp:symbol-processing-gradle-plugin:..."`
+- 对老式 `apply plugin:` 模块脚本自动补充 `apply plugin: 'com.google.devtools.ksp'`
 
-```bash
-./gradlew migrateArouterToRouter
-```
 
-## 5. 日志与报告
 
-插件运行时会输出三类信息：
+## 3. 在目标工程中集成插件
 
-- 开始日志：包含扫描目录和是否为预演模式
-- 过程日志：逐个输出发生迁移的文件和命中的规则
-- 完成日志：输出扫描文件数、变更文件数、替换次数和报告路径
+### 3.1 配置插件仓库
 
-默认报告位置：
-
-```text
-router-migration-plugin/build/reports/router-migration/report.txt
-```
-
-如果是预演任务，默认会生成：
-
-```text
-router-migration-plugin/build/reports/router-migration/preview-report.txt
-```
-
-## 6. 在业务工程中集成插件
-
-### 6.1 在 `settings.gradle` 中配置插件仓库
-
-如果插件发布在本地 Maven 仓库：
-
-```groovy
-pluginManagement {
-    repositories {
-        mavenLocal()
-        gradlePluginPortal()
-        google()
-        mavenCentral()
-    }
-}
-```
-
-如果插件发布在自定义 Maven 仓库：
+如果使用当前项目生成的本地测试仓库，请在目标工程的 `settings.gradle` 或 `settings.gradle.kts` 中配置：
 
 ```groovy
 pluginManagement {
     repositories {
         maven {
-            url = uri("你的插件仓库地址")
+            url = uri("你的 Router 仓库路径/router-migration-plugin/build/repo")
         }
         gradlePluginPortal()
         google()
         mavenCentral()
     }
 }
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
 ```
 
-### 6.2 在根工程中应用插件
+
+
+### 3.2 使用 `plugins {}` 方式接入
+
+Groovy DSL：
 
 ```groovy
 plugins {
-    id 'com.hearthappy.router.migration' version '1.0.2'
+    id 'io.hearthappy.router.migration' version '1.0.2'
 }
 
 routerMigration {
     scanDir = rootDir
-    dryRun = false
+    dryRun = true
     reportFile = file("$buildDir/reports/router-migration/report.txt")
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
@@ -146,129 +128,163 @@ routerMigration {
 }
 ```
 
-### 6.3 可选配置说明
+Kotlin DSL：
 
-- `scanDir`：扫描根目录，默认是当前项目目录
-- `dryRun`：是否只预演不写入文件，默认 `false`
-- `reportFile`：迁移结果报告输出文件
-- `includeFileSuffixes`：需要扫描的文件后缀
-- `excludeDirectoryNames`：忽略的目录名
+```kotlin
+plugins {
+    id("io.hearthappy.router.migration") version "1.0.2"
+}
+
+routerMigration {
+    scanDir = rootDir
+    dryRun = true
+    reportFile = file("$buildDir/reports/router-migration/report.txt")
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    kspPluginVersion = "2.0.10-1.0.24"
+}
+```
+
+### 3.3 使用 `buildscript + apply plugin` 方式接入老项目
+
+如果目标工程是老式 Gradle 工程，没有使用 `plugins {}`，而是使用：
+
+```groovy
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+```
+
+那么仅仅在仓库里有插件包还不够，你还必须把插件加入根工程 `buildscript` 的 `classpath`。
+
+根 `build.gradle` 示例：
+
+```groovy
+buildscript {
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.github.hearthappy:router-migration-plugin:1.0.2"
+    }
+}
+```
+
+然后在需要执行迁移任务的模块或根脚本中应用：
+
+```groovy
+apply plugin: 'io.hearthappy.router.migration'
+```
+
+兼容旧 ID 的写法也支持：
+
+```groovy
+apply plugin: 'com.hearthappy.router.migration'
+```
+
+推荐优先使用：
+
+```groovy
+apply plugin: 'io.hearthappy.router.migration'
+```
+
+说明：
+
+- `plugins {}` 方式依赖 `pluginManagement.repositories`
+- `apply plugin:` 方式依赖 `buildscript.repositories + buildscript.dependencies.classpath`
+- 你看到 `~/.m2/repository/io/github/hearthappy/router-migration-plugin/1.0.2` 只能说明插件主包已经发布成功
+- 如果使用 `apply plugin:`，没有把插件加入 `buildscript classpath`，Gradle 仍然会报 `Plugin with id ... not found`
+
+## 4. 可配置项
+
+- `scanDir`：扫描根目录，默认当前工程目录
+- `dryRun`：是否只预演不写文件，默认 `false`
+- `reportFile`：报告输出文件
+- `includeFileSuffixes`：扫描的文件后缀集合
+- `excludeDirectoryNames`：忽略目录集合
 - `enableGradleDependencyMigration`：是否迁移 Gradle 依赖，默认 `true`
-- `routerCoreDependency`：替换后的 `router-core` 依赖坐标
-- `routerCompilerDependency`：替换后的 `router-compiler` 依赖坐标
-- `kspPluginVersion`：自动补充时使用的 KSP 插件版本
+- `routerCoreDependency`：替换后的 `router-core` 坐标
+- `routerCompilerDependency`：替换后的 `router-compiler` 坐标
+- `kspPluginVersion`：自动补充 KSP 插件时使用的版本
+
+示例：
+
+```groovy
+routerMigration {
+    scanDir = rootDir
+    dryRun = false
+    reportFile = file("$buildDir/reports/router-migration/report.txt")
+    includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
+    excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
+    enableGradleDependencyMigration = true
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    kspPluginVersion = "2.0.10-1.0.24"
+}
+```
+
+## 5. 使用方式
+
+### 5.1 先预演
+
+建议先执行：
+
+```bash
+.\gradlew previewArouterToRouterMigration
+```
+
+预演模式不会修改源码，只会输出日志并生成报告。
+
+### 5.2 再正式迁移
+
+确认预演结果无误后执行：
+
+```bash
+.\gradlew migrateArouterToRouter
+```
+
+插件会直接修改匹配到的源码和 Gradle 脚本。
+
+## 6. 报告与日志
+
+默认报告路径：
+
+```text
+build/reports/router-migration/report.txt
+```
+
+预演任务默认生成：
+
+```text
+build/reports/router-migration/preview-report.txt
+```
+
+报告包含：
+
+- 扫描目录
+- 是否为预演模式
+- 扫描文件数
+- 变更文件数
+- 总替换次数
+- 每个文件命中的迁移规则明细
 
 ## 7. 推荐迁移流程
 
-推荐按下面步骤进行：
+建议按以下顺序操作：
 
-1. 先发布插件到本地仓库
-2. 在目标工程中接入插件
-3. 先执行 `previewArouterToRouterMigration`
-4. 查看控制台日志和报告文件
-5. 确认结果后执行 `migrateArouterToRouter`
-6. 最后执行一次项目编译并人工检查少量特殊代码
 
-## 8. 发布插件到本地仓库
+1. 在目标工程接入插件和 Router 依赖仓库
+2. 执行 `previewArouterToRouterMigration`
+3. 查看控制台和报告文件
+4. 确认结果后执行 `migrateArouterToRouter`
+5. 执行一次全量构建
+6. 对服务获取、拦截器、参数注入和页面跳转做人工回归
 
-### 8.1 发布到 Maven Local
+## 8. 注意事项
 
-```bash
-./gradlew :router-migration-plugin:publishToMavenLocal
-```
-
-发布后，其他工程只要在 `pluginManagement.repositories` 中声明 `mavenLocal()`，就可以通过插件 ID 直接使用。
-
-### 8.2 发布到项目内本地测试仓库
-
-```bash
-./gradlew :router-migration-plugin:publishAllPublicationsToProjectLocalRepository
-```
-
-发布目录：
-
-```text
-router-migration-plugin/build/repo
-```
-
-同时可以执行：
-
-```bash
-./gradlew :router-migration-plugin:zipRepo
-```
-
-该任务会把本地仓库内容打包到：
-
-```text
-router-migration-plugin/build/router-migration-plugin.zip
-```
-
-## 9. 发布插件到远程仓库
-
-插件模块已经支持远程发布，默认按 Sonatype OSSRH 地址配置：
-
-- Release：`https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/`
-- Snapshot：`https://s01.oss.sonatype.org/content/repositories/snapshots/`
-
-你可以通过 `gradle.properties` 或环境变量提供远程发布凭据。
-
-### 9.1 推荐的 `gradle.properties` 配置
-
-```properties
-ossrhUsername=your_username
-ossrhPassword=your_password
-
-routerReleaseRepoUrl=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/
-routerSnapshotRepoUrl=https://s01.oss.sonatype.org/content/repositories/snapshots/
-```
-
-也支持环境变量：
-
-```bash
-export OSSRH_USERNAME=your_username
-export OSSRH_PASSWORD=your_password
-```
-
-### 9.2 发布命令
-
-发布正式版：
-
-```bash
-./gradlew :router-migration-plugin:publishAllPublicationsToRemoteRepository
-```
-
-如果版本号以 `SNAPSHOT` 结尾，会自动发布到 Snapshot 仓库；否则发布到 Release 仓库。
-
-## 10. 签名说明
-
-插件模块已经接入 `signing`：
-
-- 发布非 `SNAPSHOT` 版本时会自动签名
-- `publishToMavenLocal` 和本地测试仓库发布可不依赖远程仓库认证
-
-当前项目已经存在以下签名配置：
-
-```properties
-signing.keyId=你的 keyId
-signing.password=你的 password
-signing.secretKeyRingFile=你的密钥文件
-```
-
-如果后续你希望使用内存密钥，也可以切换为 `useInMemoryPgpKeys(...)` 方案。
-
-## 11. 注意事项
-
-- 当前迁移规则以文本替换和正则替换为主，适合绝大多数标准 ARouter 写法
-- 如果业务代码存在高度自定义封装，建议先执行预演任务
-- 迁移完成后，仍建议执行一次全量编译和人工回归
-- Gradle 依赖迁移只处理常见写法，个别复杂脚本场景可能需要手动调整
-
-## 12. 后续可扩展方向
-
-后续可以继续增强以下能力：
-
-- 增加更多 README 中未覆盖的迁移规则
-- 输出更细粒度的差异报告
-- 提供白名单/黑名单目录配置
-- 提供按模块迁移能力
-- 提供自动备份与回滚能力
+- 插件现在不仅支持 Kotlin 老项目，也支持 Java 老项目中的常见 ARouter 写法迁移
+- Java 场景重点覆盖了 `navigation(SomeService.class)` 和强转后的 `build(...).navigation()`
+- 对于复杂封装代码，仍建议先预演再正式执行
+- Gradle 依赖迁移只覆盖常规写法，特殊脚本请自行复核
+- 迁移结束后建议执行代码格式化和无用导包清理

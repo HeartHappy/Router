@@ -9,7 +9,7 @@ open class RouterMigrationExtension(project: Project) {
         const val EXTENSION_NAME = "routerMigration"
     }
 
-    var scanDir: File = project.projectDir
+    var scanDir: File = project.rootProject.projectDir
     var includeFileSuffixes: Set<String> = linkedSetOf(".kt", ".java", ".gradle", ".gradle.kts")
     var excludeDirectoryNames: Set<String> = linkedSetOf(".git", ".gradle", ".idea", "bin", "build", "out")
     var reportFile: File = project.layout.buildDirectory.file("reports/router-migration/report.txt").get().asFile

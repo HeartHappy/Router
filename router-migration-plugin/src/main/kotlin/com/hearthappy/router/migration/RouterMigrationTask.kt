@@ -14,8 +14,13 @@ open class RouterMigrationTask : DefaultTask() {
         const val TASK_NAME = "migrateArouterToRouter"
         const val DRY_RUN_TASK_NAME = "previewArouterToRouterMigration"
         private val REPORT_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        private val ROOT_KSP_CLASSPATH_REGEX = Regex(
+            """(?m)^(\s*)classpath\s*\(?\s*["']com\.google\.devtools\.ksp:symbol-processing-gradle-plugin:[^"']+["']\s*\)?"""
+        )
         private val ROOT_KSP_PLUGIN_REGEX = Regex("""(?m)^(\s*)(id\s*\(?\s*["']com\.google\.devtools\.ksp["']\)?|alias\s*\(\s*libs\.plugins\.[^)]+ksp[^)]*\))""")
         private val MODULE_KSP_PLUGIN_REGEX = Regex("""(?m)^(\s*)id\s*\(?\s*["']com\.google\.devtools\.ksp["']\)?""")
+        private val MODULE_KSP_APPLY_PLUGIN_REGEX = Regex("""(?m)^(\s*)apply\s+plugin:\s*["']com\.google\.devtools\.ksp["']\s*$""")
+        private val MODULE_KAPT_APPLY_PLUGIN_REGEX = Regex("""(?m)^(\s*)apply\s+plugin:\s*["']kotlin-kapt["']\s*\r?\n?""")
         private val GROOVY_AROUTER_API_REGEX = Regex(
             """(?m)^(\s*)(implementation|api)\s*\(?\s*["']com\.alibaba:arouter-api:[^"']+["']\s*\)?(\s*(?://.*)?)$"""
         )
@@ -174,48 +179,124 @@ open class RouterMigrationTask : DefaultTask() {
         isKotlinDsl: Boolean
     ): TextReplacementResult {
         val isRootBuildFile = file.parentFile == scanRoot && file.name.startsWith("build.gradle")
-        if (!content.contains("plugins")) {
+        if (isRootBuildFile) {
+            if (ROOT_KSP_PLUGIN_REGEX.containsMatchIn(content) ||
+                ROOT_KSP_CLASSPATH_REGEX.containsMatchIn(content) ||
+                content.contains("devtools.ksp")
+            ) {
+                return TextReplacementResult.noChanges(content)
+            }
+
+            if (content.contains("plugins")) {
+                val insertion = if (isKotlinDsl) {
+                    """    id("com.google.devtools.ksp") version "${extension.kspPluginVersion}" apply false"""
+                } else {
+                    """    id 'com.google.devtools.ksp' version '${extension.kspPluginVersion}' apply false"""
+                }
+                return insertIntoPluginsBlock(
+                    content = content,
+                    insertionLine = insertion,
+                    ruleId = "gradle-root-ksp-plugin",
+                    description = "Add KSP plugin version declaration to root build script"
+                )
+            }
+
+            if (!isKotlinDsl && content.contains("buildscript")) {
+                return insertIntoBuildscriptDependencies(
+                    content = content,
+                    insertionLine = "        classpath \"com.google.devtools.ksp:symbol-processing-gradle-plugin:${extension.kspPluginVersion}\"",
+                    ruleId = "gradle-root-ksp-classpath",
+                    description = "Add KSP classpath dependency to root buildscript"
+                )
+            }
+
             return TextReplacementResult.noChanges(content)
         }
 
-        if (isRootBuildFile) {
-            if (ROOT_KSP_PLUGIN_REGEX.containsMatchIn(content) || content.contains("devtools.ksp")) {
-                return TextReplacementResult.noChanges(content)
-            }
-            val insertion = if (isKotlinDsl) {
-                """    id("com.google.devtools.ksp") version "${extension.kspPluginVersion}" apply false"""
-            } else {
-                """    id 'com.google.devtools.ksp' version '${extension.kspPluginVersion}' apply false"""
-            }
-            return insertIntoPluginsBlock(
-                content = content,
-                insertionLine = insertion,
-                ruleId = "gradle-root-ksp-plugin",
-                description = "Add KSP plugin version declaration to root build script"
-            )
-        }
-
-        if (MODULE_KSP_PLUGIN_REGEX.containsMatchIn(content)) {
+        if (MODULE_KSP_PLUGIN_REGEX.containsMatchIn(content) || MODULE_KSP_APPLY_PLUGIN_REGEX.containsMatchIn(content)) {
             return TextReplacementResult.noChanges(content)
         }
 
         val needsKspPlugin = content.contains("ksp(") ||
+            content.contains("ksp '") ||
+            content.contains("ksp(\"") ||
+            content.contains("ksp") && content.contains("router-compiler") ||
             content.contains("com.alibaba:arouter-compiler")
 
         if (!needsKspPlugin) {
             return TextReplacementResult.noChanges(content)
         }
 
-        val insertion = if (isKotlinDsl) {
-            """    id("com.google.devtools.ksp")"""
-        } else {
-            """    id 'com.google.devtools.ksp'"""
+        if (content.contains("plugins")) {
+            val insertion = if (isKotlinDsl) {
+                """    id("com.google.devtools.ksp")"""
+            } else {
+                """    id 'com.google.devtools.ksp'"""
+            }
+            return insertIntoPluginsBlock(
+                content = content,
+                insertionLine = insertion,
+                ruleId = "gradle-module-ksp-plugin",
+                description = "Add KSP plugin to module build script"
+            )
         }
-        return insertIntoPluginsBlock(
-            content = content,
-            insertionLine = insertion,
-            ruleId = "gradle-module-ksp-plugin",
-            description = "Add KSP plugin to module build script"
+
+        if (!isKotlinDsl && content.contains("apply plugin:")) {
+            return insertAfterLastApplyPlugin(
+                content = content,
+                insertionLine = "apply plugin: 'com.google.devtools.ksp'",
+                ruleId = "gradle-module-ksp-apply-plugin",
+                description = "Add KSP apply plugin to legacy module build script"
+            )
+        }
+
+        return TextReplacementResult.noChanges(content)
+    }
+
+    private fun insertIntoBuildscriptDependencies(
+        content: String,
+        insertionLine: String,
+        ruleId: String,
+        description: String
+    ): TextReplacementResult {
+        val dependenciesRegex = Regex("""buildscript\s*\{[\s\S]*?dependencies\s*\{""")
+        val match = dependenciesRegex.find(content) ?: return TextReplacementResult.noChanges(content)
+        val insertionIndex = match.range.last + 1
+        val updatedText = buildString {
+            append(content.substring(0, insertionIndex))
+            append(System.lineSeparator())
+            append(insertionLine)
+            append(content.substring(insertionIndex))
+        }
+        return TextReplacementResult(
+            updatedText = updatedText,
+            count = 1,
+            ruleId = ruleId,
+            description = description
+        )
+    }
+
+    private fun insertAfterLastApplyPlugin(
+        content: String,
+        insertionLine: String,
+        ruleId: String,
+        description: String
+    ): TextReplacementResult {
+        val applyPluginRegex = Regex("""(?m)^(\s*)apply\s+plugin:\s*["'][^"']+["']\s*$""")
+        val matches = applyPluginRegex.findAll(content).toList()
+        val lastMatch = matches.lastOrNull() ?: return TextReplacementResult.noChanges(content)
+        val insertionIndex = lastMatch.range.last + 1
+        val updatedText = buildString {
+            append(content.substring(0, insertionIndex))
+            append(System.lineSeparator())
+            append(insertionLine)
+            append(content.substring(insertionIndex))
+        }
+        return TextReplacementResult(
+            updatedText = updatedText,
+            count = 1,
+            ruleId = ruleId,
+            description = description
         )
     }
 
@@ -277,6 +358,13 @@ open class RouterMigrationTask : DefaultTask() {
 
     private fun baseRules(): List<RouterMigrationRule> = listOf(
         RouterMigrationRule(
+            id = "import-router",
+            description = "Replace ARouter launcher import",
+            type = RouterMigrationRule.RuleType.LITERAL,
+            oldValue = "com.alibaba.android.arouter.launcher.ARouter",
+            newValue = "com.hearthappy.router.launcher.Router"
+        ),
+        RouterMigrationRule(
             id = "import-route",
             description = "Replace Route annotation import",
             type = RouterMigrationRule.RuleType.LITERAL,
@@ -326,6 +414,13 @@ open class RouterMigrationTask : DefaultTask() {
             newValue = "com.hearthappy.router.launcher.Sorter"
         ),
         RouterMigrationRule(
+            id = "import-navigation-callback",
+            description = "Replace navigation callback import",
+            type = RouterMigrationRule.RuleType.LITERAL,
+            oldValue = "com.alibaba.android.arouter.facade.callback.NavigationCallback",
+            newValue = "com.hearthappy.router.interfaces.NavigationCallback"
+        ),
+        RouterMigrationRule(
             id = "import-interceptor-callback",
             description = "Replace interceptor callback import",
             type = RouterMigrationRule.RuleType.LITERAL,
@@ -338,6 +433,30 @@ open class RouterMigrationTask : DefaultTask() {
             type = RouterMigrationRule.RuleType.LITERAL,
             oldValue = "com.alibaba.android.arouter.facade.template.IInterceptor",
             newValue = "com.hearthappy.router.interfaces.IInterceptor"
+        ),
+        RouterMigrationRule(
+            id = "remove-arouter-init",
+            description = "Remove ARouter.init(...) initialization call",
+            type = RouterMigrationRule.RuleType.REGEX,
+            target = RouterMigrationRule.TargetType.SOURCE,
+            oldValue = """(?m)^[ \t]*ARouter\.init\(\s*[^)\r\n]+\s*\)\s*;?\s*\r?\n?""",
+            newValue = ""
+        ),
+        RouterMigrationRule(
+            id = "remove-arouter-open-debug",
+            description = "Remove ARouter.openDebug() call",
+            type = RouterMigrationRule.RuleType.REGEX,
+            target = RouterMigrationRule.TargetType.SOURCE,
+            oldValue = """(?m)^[ \t]*ARouter\.openDebug\(\s*\)\s*;?\s*\r?\n?""",
+            newValue = ""
+        ),
+        RouterMigrationRule(
+            id = "replace-arouter-open-log",
+            description = "Replace ARouter.openLog() with Router.openLog()",
+            type = RouterMigrationRule.RuleType.REGEX,
+            target = RouterMigrationRule.TargetType.SOURCE,
+            oldValue = """\bARouter\.openLog\(\s*\)""",
+            newValue = "Router.openLog()"
         ),
         RouterMigrationRule(
             id = "class-sorter",
@@ -356,6 +475,22 @@ open class RouterMigrationTask : DefaultTask() {
             newValue = "ProviderService"
         ),
         RouterMigrationRule(
+            id = "java-instance-by-class",
+            description = "Replace Java ARouter navigation(Class) with Router.getInstance(Class)",
+            type = RouterMigrationRule.RuleType.REGEX,
+            target = RouterMigrationRule.TargetType.SOURCE,
+            oldValue = """\bARouter\.getInstance\(\)\.navigation\(\s*([a-zA-Z0-9_.$]+)\s*\.class\s*\)""",
+            newValue = "Router.getInstance($1.class)"
+        ),
+        RouterMigrationRule(
+            id = "java-instance-cast-from-arouter-build",
+            description = "Replace Java casted ARouter build(...).navigation() with Router.build(...).getInstance()",
+            type = RouterMigrationRule.RuleType.REGEX,
+            target = RouterMigrationRule.TargetType.SOURCE,
+            oldValue = """\(\s*([a-zA-Z0-9_.$<>?,\s]+)\s*\)\s*ARouter\.getInstance\(\)\.build\((.+?)\)\.navigation\(\s*\)""",
+            newValue = "($1) Router.build($2).getInstance()"
+        ),
+        RouterMigrationRule(
             id = "api-router-instance",
             description = "Replace ARouter.getInstance() with Router",
             type = RouterMigrationRule.RuleType.REGEX,
@@ -370,6 +505,14 @@ open class RouterMigrationTask : DefaultTask() {
             target = RouterMigrationRule.TargetType.SOURCE,
             oldValue = """navigation\(\s*([a-zA-Z0-9_.$]+)\s*::\s*class\s*\.\s*java\s*\)""",
             newValue = "getInstance($1::class.java)"
+        ),
+        RouterMigrationRule(
+            id = "java-instance-cast",
+            description = "Replace Java casted Router.build(...).navigation() with Router.build(...).getInstance()",
+            type = RouterMigrationRule.RuleType.REGEX,
+            target = RouterMigrationRule.TargetType.SOURCE,
+            oldValue = """\(\s*([a-zA-Z0-9_.$<>?,\s]+)\s*\)\s*Router\.build\((.+?)\)\.navigation\(\s*\)""",
+            newValue = "($1) Router.build($2).getInstance()"
         ),
         RouterMigrationRule(
             id = "instance-cast",

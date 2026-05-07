@@ -7,7 +7,6 @@ plugins {
 
 group = 'io.github.hearthappy'
 version = rootProject.ext.publishVersion
-
 def artifactName = 'router-migration-plugin'
 def signingKeyRingFile = rootProject.findProperty('signing.secretKeyRingFile')
 def signingKeyRing = signingKeyRingFile ? rootProject.file(signingKeyRingFile) : null
@@ -19,6 +18,12 @@ def hasSigningConfig =
 gradlePlugin {
     plugins {
         routerMigrationPlugin {
+            id = 'io.hearthappy.router.migration'
+            implementationClass = 'com.hearthappy.router.migration.RouterMigrationPlugin'
+            displayName = 'Router Migration Plugin'
+            description = 'Migrate ARouter source code and Gradle scripts to Router.'
+        }
+        routerMigrationPluginCompat {
             id = 'com.hearthappy.router.migration'
             implementationClass = 'com.hearthappy.router.migration.RouterMigrationPlugin'
             displayName = 'Router Migration Plugin'

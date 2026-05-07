@@ -8,12 +8,6 @@ plugins {
 group = 'io.github.hearthappy'
 version = rootProject.ext.publishVersion
 def artifactName = 'router-migration-plugin'
-def signingKeyRingFile = rootProject.findProperty('signing.secretKeyRingFile')
-def signingKeyRing = signingKeyRingFile ? rootProject.file(signingKeyRingFile) : null
-def hasSigningConfig =
-        rootProject.hasProperty('signing.keyId') &&
-                rootProject.hasProperty('signing.password') &&
-                signingKeyRing?.exists()
 
 gradlePlugin {
     plugins {
@@ -47,7 +41,7 @@ dependencies {
 
 tasks.register('zipRepo', Zip) {
     from "$buildDir/repo"
-    archiveFileName = "${artifactName}.zip"
+    archiveFileName = "io.zip"
     destinationDirectory = file(buildDir)
 }
 
@@ -95,14 +89,15 @@ afterEvaluate {
 
     signing {
         // 仅在根工程提供可用密钥文件时启用签名，避免本地发布被阻塞
-        required { hasSigningConfig }
-        if (hasSigningConfig) {
-            sign(publishing.publications)
-        }
+        sign(publishing.publications)
     }
 
     tasks.named('zipRepo') {
-        dependsOn 'publishAllPublicationsToMavenRepository'
+        dependsOn 'publishPluginMavenPublicationToMavenRepository'
+    }
+
+    tasks.named('publishPluginMavenPublicationToMavenRepository') {
+        finalizedBy tasks.named('zipRepo')
     }
 
     tasks.named('publishAllPublicationsToMavenRepository') {

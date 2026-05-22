@@ -79,6 +79,20 @@
 - 对老式 `buildscript {}` 根脚本自动补充 `classpath "com.google.devtools.ksp:symbol-processing-gradle-plugin:..."`
 - 对老式 `apply plugin:` 模块脚本自动补充 `apply plugin: 'com.google.devtools.ksp'`
 
+## 2.5 推荐版本矩阵
+
+推荐按目标工程的工具链选择 Router 版本：
+
+| Router版本 | 推荐AGP | 推荐Kotlin | 推荐KSP | 说明 |
+|------------------|---------------------|---------------------|---------------------|---------------------|
+| `1.0.3` | `9.2.1` | `2.3.21` | `2.3.7` | 当前主推版本，适合最新项目与最新迁移场景 |
+| `1.0.2` | `8.5+` | `2.0.10` | `2.0.10-1.0.24` | 适合仍处于 Kotlin 2.0 工具链的旧项目 |
+
+补充说明：
+
+- 如果目标工程低于 `AGP 8.5` 或低于 `Kotlin 2.0`，不建议直接升级到 `Router 1.0.3`
+- 一键迁移时，`routerCoreDependency`、`routerCompilerDependency`、`kspPluginVersion` 应与目标版本线保持一致
+- 最新推荐迁移组合：`Router 1.0.3 + AGP 9.2.1 + Kotlin 2.3.21 + KSP 2.3.7`
 
 
 ## 3. 在目标工程中集成插件
@@ -115,15 +129,15 @@ Groovy DSL：
 
 ```groovy
 plugins {
-    id 'io.hearthappy.router.migration' version '1.0.2'
+    id 'io.hearthappy.router.migration' version '1.0.3'
 }
 
 routerMigration {
     scanDir = rootDir
     dryRun = true
     reportFile = file("$buildDir/reports/router-migration/report.txt")
-    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
-    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.3"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.3"
     kspPluginVersion = "2.3.7"
 }
 ```
@@ -132,15 +146,15 @@ Kotlin DSL：
 
 ```kotlin
 plugins {
-    id("io.hearthappy.router.migration") version "1.0.2"
+    id("io.hearthappy.router.migration") version "1.0.3"
 }
 
 routerMigration {
     scanDir = rootDir
     dryRun = true
     reportFile = file("$buildDir/reports/router-migration/report.txt")
-    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
-    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.3"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.3"
     kspPluginVersion = "2.3.7"
 }
 ```
@@ -172,7 +186,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "io.github.hearthappy:router-migration-plugin:1.0.2"
+        classpath "io.github.hearthappy:router-migration-plugin:1.0.3"
     }
 }
 ```
@@ -193,8 +207,8 @@ routerMigration {
     includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
     excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
     enableGradleDependencyMigration = true
-    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
-    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.3"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.3"
     kspPluginVersion = "2.3.7"
 }
 ```
@@ -203,7 +217,7 @@ routerMigration {
 
 - `plugins {}` 方式依赖 `pluginManagement.repositories`
 - `apply plugin:` 方式依赖 `buildscript.repositories + buildscript.dependencies.classpath`
-- 你看到 `~/.m2/repository/io/github/hearthappy/router-migration-plugin/1.0.2` 只能说明插件主包已经发布成功
+- 你看到 `~/.m2/repository/io/github/hearthappy/router-migration-plugin/1.0.3` 只能说明插件主包已经发布成功
 - 如果使用 `apply plugin:`，没有把插件加入 `buildscript classpath`，Gradle 仍然会报 `Plugin with id ... not found`
 - `routerMigration {}` 必须配置在需要迁移的模块 `build.gradle` 中，例如 `app/build.gradle`
 - 如果你在项目根目录执行 `.\gradlew migrateArouterToRouter`，那么所有应用了迁移插件的子模块都必须配置 `routerMigration {}`
@@ -231,8 +245,8 @@ routerMigration {
     includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
     excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
     enableGradleDependencyMigration = true
-    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
-    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.3"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.3"
     kspPluginVersion = "2.3.7"
 }
 ```
@@ -255,20 +269,19 @@ routerMigration {
 }
 ```
 
-### 4.2 重点说明：KSP 版本必须与 Kotlin 版本保持一致
+### 4.2 重点说明：KSP 版本必须与 Kotlin / Router 版本保持一致
 
 你必须保证目标工程中的 Kotlin、AGP 与 KSP 版本彼此兼容，否则会出现 Gradle 同步失败、插件不兼容或 `ksp(...)` 无法工作等问题。
 
-这里要区分两代 KSP：
+推荐对应关系：
 
-- 旧版 KSP1 常见版本形态是 `2.0.10-1.0.24`、`1.9.24-1.0.20`
-- 新版 KSP2 从 `2.3.x` 开始使用独立版本号，例如 `2.3.7`
-- 迁移新项目时，优先使用 `KSP 2.3.7`
+- `Router 1.0.3` -> `AGP 9.2.1` + `Kotlin 2.3.21` + `KSP 2.3.7`
+- `Router 1.0.2` -> `AGP 8.5+` + `Kotlin 2.0.10` + `KSP 2.0.10-1.0.24`
 
 建议：
 
-- 新项目或 `AGP 9.x` 项目：优先使用 `KSP 2.3.7`
-- 老项目如果仍停留在旧 Kotlin 体系，再按对应 Kotlin 版本选择旧版 KSP1
+- 新项目或 `AGP 9.x` 项目：优先迁移到 `Router 1.0.3`
+- 老项目如果仍停留在 Kotlin 2.0 体系，优先保持 `Router 1.0.2` 版本线
 - 如果目标工程本身已经使用 `plugins { alias(libs.plugins...) }`，优先沿用插件 DSL，不要混用旧的 `apply plugin: 'kotlin-android'` 方案
 
 ## 5. 使用方式

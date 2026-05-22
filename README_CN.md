@@ -31,6 +31,19 @@
 
 <a id="configuration"></a>
 ### 三、配置
+#### 0、Router 版本推荐矩阵
+
+| Router版本 | 推荐AGP | 推荐Kotlin | 推荐KSP | 适用场景 |
+|------------------|---------------------|---------------------|---------------------|---------------------|
+| `1.0.3` | `9.2.1` | `2.3.21` | `2.3.7` | 新项目、最新工具链、优先推荐 |
+| `1.0.2` | `8.5+` | `2.0.10` | `2.0.10-1.0.24` | 已处于 Kotlin 2.0 体系的旧项目 |
+
+补充说明：
+
+- `1.0.3` 是当前主推版本，已完成 `AGP 9.2.1 + KSP 2.3.7` 适配
+- 低于 `AGP 8.5` 或低于 `Kotlin 2.0` 的项目，不建议直接升级到 `1.0.3`
+- 老项目升级前，建议先按上表选择对应版本并在独立分支验证
+
 #### 1、在build.gradle（Project）文件中加入
 ```groovy
 plugins{
@@ -57,8 +70,8 @@ android{
 }
 
 dependencies {
-	implementation('io.github.hearthappy:router-core:1.0.2')  
-	ksp('io.github.hearthappy:router-compiler:1.0.2')
+	implementation('io.github.hearthappy:router-core:1.0.3')  
+	ksp('io.github.hearthappy:router-compiler:1.0.3')
 }
 ```
 
@@ -378,7 +391,8 @@ Router.build(RouterPath.MODULES2_UI).navigation(this@ForResultActivity, 100, obj
 
 迁移步骤：
 
-- 在项目根 `build.gradle` 中加入：`classpath "io.github.hearthappy:router-migration-plugin:1.0.2"`
+- 最新推荐组合：`Router 1.0.3 + AGP 9.2.1 + Kotlin 2.3.21 + KSP 2.3.7`
+- 在项目根 `build.gradle` 中加入：`classpath "io.github.hearthappy:router-migration-plugin:1.0.3"`
 - 或者使用 `plugins {}` 方式集成迁移插件
 - 在需要迁移的模块中，例如 `app/build.gradle`，添加：`apply plugin: 'io.hearthappy.router.migration'`
 - 在每个需要迁移的模块 `build.gradle` 中，都必须添加 `routerMigration {}` 迁移配置
@@ -396,7 +410,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "io.github.hearthappy:router-migration-plugin:1.0.2"
+        classpath "io.github.hearthappy:router-migration-plugin:1.0.3"
     }
 }
 ```
@@ -413,8 +427,8 @@ routerMigration {
     includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
     excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
     enableGradleDependencyMigration = true
-    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
-    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.3"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.3"
     kspPluginVersion = "2.3.7"
 }
 ```
@@ -423,7 +437,7 @@ routerMigration {
 
 ```groovy
 plugins {
-    id 'io.hearthappy.router.migration' version '1.0.2'
+    id 'io.hearthappy.router.migration' version '1.0.3'
 }
 ```
 
@@ -435,8 +449,8 @@ routerMigration {
     includeFileSuffixes = [".kt", ".java", ".gradle", ".gradle.kts"] as Set
     excludeDirectoryNames = [".git", ".gradle", ".idea", "build", "out"] as Set
     enableGradleDependencyMigration = true
-    routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
-    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
+    routerCoreDependency = "io.github.hearthappy:router-core:1.0.3"
+    routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.3"
     kspPluginVersion = "2.3.7"
 }
 ```

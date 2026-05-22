@@ -34,14 +34,6 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
 /**
@@ -49,58 +41,23 @@ import kotlin.system.measureTimeMillis
  * @author ChenRui
  * ClassDescription： Parse and generate routing files
  */
-class RouterProcessor(private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory) : SymbolProcessor { // 使用线程安全的集合存储路由信息
+class RouterProcessor(private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val routeSymbols = resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!)
-        val invalidSymbols = routeSymbols.filter { it.validate() }.toList()
-        if (invalidSymbols.isEmpty()) return emptyList()
+        val routeSymbols = resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!).toList()
+        if (routeSymbols.isEmpty()) return emptyList()
 
-        val declarationSequence = routeSymbols.filterIsInstance<KSClassDeclaration>()
+        val deferredSymbols = routeSymbols.filterNot { it.validate() }
+        val declarations = routeSymbols.filterIsInstance<KSClassDeclaration>().filter { it.validate() }
+        if (declarations.isEmpty()) return deferredSymbols
+
         val took = measureTimeMillis {
-            runBlocking {
-                val routeChannel = Channel<RouterInfo>(Channel.UNLIMITED)
-
-                val producer = producerJob(routeChannel, declarationSequence)
-
-                val consumer = consumerJob(routeChannel, declarationSequence.count())
-
-                joinAll(producer, consumer)
-            }
+            declarations
+                .mapNotNull { declaration -> RouterVisitor().parse(declaration) }
+                .forEach(::generateRouterTable)
         }
-        KSPLog.printRouterTook(declarationSequence.count(), took)
-        return emptyList()
+        KSPLog.printRouterTook(declarations.size, took)
+        return deferredSymbols
     }
-
-    /**
-     * 消费者协程：路由文件的生成
-     * @receiver CoroutineScope
-     * @param routeChannel Channel<RouterInfo>
-     * @param totalCount Int
-     * @return Job
-     */
-    private fun CoroutineScope.consumerJob(routeChannel: Channel<RouterInfo>, totalCount: Int): Job {
-        return launch(Dispatchers.IO) {
-            var count = 0
-            routeChannel.consumeEach {
-                generateRouterTable(it)
-                if (++count == totalCount) routeChannel.close()
-            }
-        }
-    }
-
-    /**
-     * 生产者协程：符号解析
-     * @receiver CoroutineScope
-     * @param routeChannel Channel<RouterInfo>
-     * @param declarationSequence Sequence<KSClassDeclaration>
-     * @return Job
-     */
-    private fun CoroutineScope.producerJob(routeChannel: Channel<RouterInfo>, declarationSequence: Sequence<KSClassDeclaration>): Job {
-        return launch(Dispatchers.Default) {
-            declarationSequence.forEach { it.accept(RouterVisitor(routeChannel, this), Unit) }
-        }
-    }
-
 
     private fun generateRouterTable(info: RouterInfo) {
         poetFactory.apply {

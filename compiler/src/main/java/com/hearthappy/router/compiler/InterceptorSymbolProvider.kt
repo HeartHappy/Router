@@ -30,21 +30,24 @@ class InterceptorSymbolProvider : SymbolProcessorProvider {
     }
 
     inner class InterceptorProcessor(private val codeGenerator: CodeGenerator, private val poetFactory: IPoetFactory) : SymbolProcessor {
-        private val interceptors = mutableListOf<InterceptorInfo>()
-        private val alphabet = ('A'..'J').map { it.toString() }
         override fun process(resolver: com.google.devtools.ksp.processing.Resolver): List<com.google.devtools.ksp.symbol.KSAnnotated> {
+            val interceptorSymbols = resolver.getSymbolsWithAnnotation(Interceptor::class.qualifiedName!!).toList()
+            if (interceptorSymbols.isEmpty()) return emptyList()
+
+            val deferredSymbols = interceptorSymbols.filterNot { it.validate() }
+            val validDeclarations = interceptorSymbols.filterIsInstance<KSClassDeclaration>().filter { it.validate() }
+            if (validDeclarations.isEmpty()) return deferredSymbols
+
+            val interceptors = mutableListOf<InterceptorInfo>()
             val measureTimeMillis = measureTimeMillis {
-                val interceptorSymbols = resolver.getSymbolsWithAnnotation(Interceptor::class.qualifiedName!!)
-                val filterInterceptor = interceptorSymbols.filter { it.validate() }.toList()
-                if (filterInterceptor.isEmpty()) return emptyList()
-                filterInterceptor.filterIsInstance<KSClassDeclaration>().forEach { it.accept(InterceptorVisitor(interceptors), Unit) }
-                generateInterceptor()
+                validDeclarations.forEach { it.accept(InterceptorVisitor(interceptors), Unit) }
+                generateInterceptor(interceptors)
             }
             KSPLog.printInterceptorTook(interceptors.size, measureTimeMillis)
-            return emptyList()
+            return deferredSymbols
         }
 
-        private fun generateInterceptor() {
+        private fun generateInterceptor(interceptors: List<InterceptorInfo>) {
             interceptors.forEachIndexed { index, info ->
                 poetFactory.apply {
                     generateInterceptor(index, info)
@@ -55,7 +58,7 @@ class InterceptorSymbolProvider : SymbolProcessorProvider {
         private fun IPoetFactory.generateInterceptor(index: Int, info: InterceptorInfo) {
             val classPkg = info.clazz.substringBeforeLast('.')
             val simpleName = info.clazz.substringAfterLast('.')
-            val fileName = "Interceptor$$".plus(alphabet[index])
+            val fileName = "Interceptor\$\$${index}"
             val interceptorClassSpec = createClassSpec(fileName, superClassName = null, constructorParameters = emptyList(), isAddConstructorProperty = false)
             val fileSpec = createFileSpec(fileName, Constant.GENERATE_ROUTER_INTERCEPTOR_PKG)
             KSPLog.print("interceptor:$info")

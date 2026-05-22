@@ -5,23 +5,6 @@ plugins {
     id 'signing'
 }
 def publishVersion=rootProject.ext.publishVersion
-// Notice: 2022/1/11 Android依赖发布函数库
-
-tasks.register('javadoc', Javadoc) {
-    source = android.sourceSets.main.java.sourceFiles
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-tasks.register('javadocJar', Jar) {
-    dependsOn javadoc
-    archiveClassifier.set("javadoc")
-    from javadoc.destinationDir
-}
-
-tasks.register('sourceJar', Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set("sources")
-}
 tasks.register('zipRepo', Zip) {
     from "$buildDir/repo"
     archiveFileName = 'io.zip'
@@ -36,10 +19,6 @@ afterEvaluate {
                 groupId = 'io.github.hearthappy'
                 artifactId = 'router-core'
                 version = publishVersion
-                artifacts {
-                    archives(javadocJar)
-                    archives(sourceJar)
-                }
                 pom {
                     name = 'router-core'
                     description = 'Router Core library'
@@ -89,6 +68,12 @@ afterEvaluate {
 android {
     namespace 'com.hearthappy.router.core'
     compileSdk  rootProject.ext.compileSdk
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 
     defaultConfig {
         minSdk rootProject.ext.minSdk
@@ -98,7 +83,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             consumerProguardFiles "consumer-rules.pro"
         }
@@ -117,6 +102,5 @@ dependencies {
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation(libs.androidx.startup.runtime)
-    api libs.router.annotations
-//    api(project(':annotations'))
+    api project(':annotations')
 }

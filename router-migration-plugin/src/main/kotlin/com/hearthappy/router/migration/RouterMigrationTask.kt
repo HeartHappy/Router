@@ -19,6 +19,7 @@ open class RouterMigrationTask : DefaultTask() {
         )
         private val ROOT_KSP_PLUGIN_REGEX = Regex("""(?m)^(\s*)(id\s*\(?\s*["']com\.google\.devtools\.ksp["']\)?|alias\s*\(\s*libs\.plugins\.[^)]+ksp[^)]*\))""")
         private val MODULE_KSP_PLUGIN_REGEX = Regex("""(?m)^(\s*)id\s*\(?\s*["']com\.google\.devtools\.ksp["']\)?""")
+        private val MODULE_KSP_ALIAS_REGEX = Regex("""(?m)^(\s*)alias\s*\(\s*libs\.plugins\.[^)]+ksp[^)]*\)""")
         private val MODULE_KSP_APPLY_PLUGIN_REGEX = Regex("""(?m)^(\s*)apply\s+plugin:\s*["']com\.google\.devtools\.ksp["']\s*$""")
         private val MODULE_KAPT_APPLY_PLUGIN_REGEX = Regex("""(?m)^(\s*)apply\s+plugin:\s*["']kotlin-kapt["']\s*\r?\n?""")
         private val GROOVY_AROUTER_API_REGEX = Regex(
@@ -234,7 +235,11 @@ open class RouterMigrationTask : DefaultTask() {
             return TextReplacementResult.noChanges(content)
         }
 
-        if (MODULE_KSP_PLUGIN_REGEX.containsMatchIn(content) || MODULE_KSP_APPLY_PLUGIN_REGEX.containsMatchIn(content)) {
+        if (
+            MODULE_KSP_PLUGIN_REGEX.containsMatchIn(content) ||
+            MODULE_KSP_ALIAS_REGEX.containsMatchIn(content) ||
+            MODULE_KSP_APPLY_PLUGIN_REGEX.containsMatchIn(content)
+        ) {
             return TextReplacementResult.noChanges(content)
         }
 
@@ -293,8 +298,8 @@ open class RouterMigrationTask : DefaultTask() {
         return extension.kspPluginVersion?.trim()?.takeIf { it.isNotEmpty() }
             ?: throw IllegalStateException(
                 "KSP migration requires routerMigration.kspPluginVersion to be set explicitly. " +
-                    "The KSP version must match the Kotlin version used by the target project. " +
-                    "Example: Kotlin 1.9.24 -> KSP 1.9.24-1.0.20; Kotlin 2.0.10 -> KSP 2.0.10-1.0.24."
+                    "Use a version that is compatible with the target project's Kotlin and AGP setup. " +
+                    "Recommended example for current toolchains: KSP 2.3.7."
             )
     }
 

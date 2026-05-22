@@ -15,21 +15,23 @@ import com.hearthappy.router.model.ParamsInfo
 import com.hearthappy.router.model.RouterInfo
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ksp.toClassName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 
-class RouterVisitor(private val channel: Channel<RouterInfo>, private val coroutineScope: CoroutineScope) : KSVisitorVoid() {
+class RouterVisitor : KSVisitorVoid() {
+    private var routerInfo: RouterInfo? = null
 
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
         super.visitClassDeclaration(classDeclaration, data)
-        processRouteClass(classDeclaration)
+        routerInfo = processRouteClass(classDeclaration)
     }
 
-    private fun processRouteClass(classDeclaration: KSClassDeclaration) {
-        // 优化后
+    fun parse(classDeclaration: KSClassDeclaration): RouterInfo? {
+        classDeclaration.accept(this, Unit)
+        return routerInfo
+    }
+
+    private fun processRouteClass(classDeclaration: KSClassDeclaration): RouterInfo? {
         val routeAnnotation = classDeclaration.annotations.firstOrNull { annotation -> (annotation.annotationType.resolve().declaration as? KSClassDeclaration)?.qualifiedName?.asString() == Route::class.qualifiedName }
-        val path = routeAnnotation?.arguments?.first { it.name?.asString() == "path" }?.value as String
+        val path = routeAnnotation?.arguments?.firstOrNull { it.name?.asString() == "path" }?.value as? String ?: return null
 
         val className = classDeclaration.qualifiedName?.asString() ?: ""
         val routerInfo = RouterInfo()
@@ -74,7 +76,7 @@ class RouterVisitor(private val channel: Channel<RouterInfo>, private val corout
             }
         }
         routerInfo.pkg = needImport
-        coroutineScope.launch { channel.send(routerInfo) }
+        return routerInfo
     }
 
     // 检查属性是否为 lateinit

@@ -76,10 +76,6 @@ dependencies {
 
     implementation project(':mylibrary')
     implementation project(':mylibrary2')
-    //router
-//    implementation project(':core')
-//    ksp project(':compiler')
-
-    implementation(libs.router.core)
-    ksp(libs.router.compiler)
+    implementation project(':core')
+    ksp project(':compiler')
 }

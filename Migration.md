@@ -124,7 +124,7 @@ routerMigration {
     reportFile = file("$buildDir/reports/router-migration/report.txt")
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "1.9.24-1.0.20"
+    kspPluginVersion = "2.3.7"
 }
 ```
 
@@ -141,7 +141,7 @@ routerMigration {
     reportFile = file("$buildDir/reports/router-migration/report.txt")
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "1.9.24-1.0.20"
+    kspPluginVersion = "2.3.7"
 }
 ```
 
@@ -153,6 +153,12 @@ routerMigration {
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 ```
+
+注意：
+
+- 上面这类写法仅针对旧工程
+- `AGP 9.x` 已经内建 Kotlin 支持，不应再显式应用 `kotlin-android`
+- 如果目标工程已经是 `plugins { alias(...) }` 或 `plugins { id(...) }` 方式，请优先使用插件 DSL 集成迁移插件
 
 那么仅仅在仓库里有插件包还不够，你还必须把插件加入根工程 `buildscript` 的 `classpath`。
 
@@ -189,7 +195,7 @@ routerMigration {
     enableGradleDependencyMigration = true
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "1.9.24-1.0.20"
+    kspPluginVersion = "2.3.7"
 }
 ```
 
@@ -227,7 +233,7 @@ routerMigration {
     enableGradleDependencyMigration = true
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "1.9.24-1.0.20"
+    kspPluginVersion = "2.3.7"
 }
 ```
 
@@ -245,30 +251,25 @@ routerMigration {
 
 ```groovy
 routerMigration {
-    kspPluginVersion = "1.9.24-1.0.20"
+    kspPluginVersion = "2.3.7"
 }
 ```
 
 ### 4.2 重点说明：KSP 版本必须与 Kotlin 版本保持一致
 
-你必须保证目标工程中的 Kotlin 版本与配置的 KSP 版本严格对应，否则会出现 Gradle 同步失败、插件不兼容或 `ksp(...)` 无法工作等问题。
+你必须保证目标工程中的 Kotlin、AGP 与 KSP 版本彼此兼容，否则会出现 Gradle 同步失败、插件不兼容或 `ksp(...)` 无法工作等问题。
 
-推荐对应关系：
+这里要区分两代 KSP：
 
-- Kotlin `1.9.24` -> KSP `1.9.24-1.0.20`
-- Kotlin `2.0.10` -> KSP `2.0.10-1.0.24`
+- 旧版 KSP1 常见版本形态是 `2.0.10-1.0.24`、`1.9.24-1.0.20`
+- 新版 KSP2 从 `2.3.x` 开始使用独立版本号，例如 `2.3.7`
+- 迁移新项目时，优先使用 `KSP 2.3.7`
 
-推荐优先使用以下版本组合：
+建议：
 
-- 推荐组合 1：Kotlin `1.9.24` + KSP `1.9.24-1.0.20`
-- 推荐组合 2：Kotlin `2.0.10` + KSP `2.0.10-1.0.24`
-
-错误示例：
-
-- Kotlin `1.9.24` 搭配 KSP `2.0.10-1.0.24`
-- Kotlin `2.0.10` 搭配 KSP `1.9.24-1.0.20`
-
-这两类组合都不兼容，不建议使用。
+- 新项目或 `AGP 9.x` 项目：优先使用 `KSP 2.3.7`
+- 老项目如果仍停留在旧 Kotlin 体系，再按对应 Kotlin 版本选择旧版 KSP1
+- 如果目标工程本身已经使用 `plugins { alias(libs.plugins...) }`，优先沿用插件 DSL，不要混用旧的 `apply plugin: 'kotlin-android'` 方案
 
 ## 5. 使用方式
 

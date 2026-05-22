@@ -1,0 +1,8 @@
+-keep class com.hearthappy.router.** { *; }
+-keep interface com.hearthappy.router.** { *; }
+-keep @com.hearthappy.router.analysis.TargetObject class * { *; }
+-keep @com.hearthappy.router.analysis.TargetServiceProvider class * { *; }
+-keep class com.hearthappy.router.generate.interceptor.** { *; }
+-keep class com.hearthappy.router.generate.routes.** { *; }
+-keep class com.hearthappy.router.generate.path.** { *; }
+-keep class com.hearthappy.router.generate.provider.** { *; }

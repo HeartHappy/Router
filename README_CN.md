@@ -34,8 +34,8 @@
 #### 1、在build.gradle（Project）文件中加入
 ```groovy
 plugins{
-    id "com.google.devtools.ksp" version "2.0.10-1.0.24"
-    id "org.jetbrains.kotlin.jvm" version "2.0.10"
+    id "com.google.devtools.ksp" version "2.3.7"
+    id "org.jetbrains.kotlin.jvm" version "2.3.21"
 }
 ```
 
@@ -61,6 +61,12 @@ dependencies {
 	ksp('io.github.hearthappy:router-compiler:1.0.2')
 }
 ```
+
+补充说明：
+
+- `AGP 9.x` 工程不需要再显式应用 `org.jetbrains.kotlin.android`
+- 如果你的项目使用 Version Catalog，推荐写成 `alias(libs.plugins.ksp)` 这一类插件别名方式
+- 如果是新项目，优先使用 `KSP 2.3.7`
 <a id="detailed-usage"></a>
 ### 四、使用详解
 ##### 1、添加注解
@@ -409,7 +415,7 @@ routerMigration {
     enableGradleDependencyMigration = true
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "1.9.24-1.0.20"
+    kspPluginVersion = "2.3.7"
 }
 ```
 
@@ -431,7 +437,7 @@ routerMigration {
     enableGradleDependencyMigration = true
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "1.9.24-1.0.20"
+    kspPluginVersion = "2.3.7"
 }
 ```
 

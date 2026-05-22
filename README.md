@@ -34,8 +34,8 @@ Use KSP technology to implement routing related functions, mainly to improve com
 #### 1. Add in build.gradle (Project) file
 ```groovy
 plugins{
-    id "com.google.devtools.ksp" version "2.0.10-1.0.24"
-    id "org.jetbrains.kotlin.jvm" version "2.0.10"
+    id "com.google.devtools.ksp" version "2.3.7"
+    id "org.jetbrains.kotlin.jvm" version "2.3.21"
 }
 ```
 #### 2. Add remote dependencies and ksp plugins to the build.gradle (app) file
@@ -60,6 +60,12 @@ dependencies {
 	ksp('io.github.hearthappy:router-compiler:1.0.2')
 }
 ```
+
+Notes:
+
+- On `AGP 9.x`, do not apply `org.jetbrains.kotlin.android` explicitly anymore
+- If your project uses a Version Catalog, prefer plugin aliases such as `alias(libs.plugins.ksp)`
+- For new projects, prefer `KSP 2.3.7`
 <a id="detailed-usage"></a>
 ### 4. Detailed Usage
 ##### 1. Add annotations
@@ -407,7 +413,7 @@ routerMigration {
     enableGradleDependencyMigration = true
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "1.9.24-1.0.20"
+    kspPluginVersion = "2.3.7"
 }
 ```
 
@@ -429,7 +435,7 @@ routerMigration {
     enableGradleDependencyMigration = true
     routerCoreDependency = "io.github.hearthappy:router-core:1.0.2"
     routerCompilerDependency = "io.github.hearthappy:router-compiler:1.0.2"
-    kspPluginVersion = "1.9.24-1.0.20"
+    kspPluginVersion = "2.3.7"
 }
 ```
 

@@ -36,6 +36,5 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.material
 
-    implementation libs.router.annotations
-//    implementation(project(':annotations'))
+    implementation project(':annotations')
 }
